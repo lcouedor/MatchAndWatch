@@ -19,3 +19,13 @@ const Route = use('Route')
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }
 })
+
+//Routes des watchers
+Route.post('/watcher', 'WatcherController.create')
+Route.delete('/watcher/:id', 'WatcherController.delete')
+Route.get('/watcher', 'WatcherController.index')
+
+//Routes des rooms
+Route.post('/room', 'RoomController.create')
+Route.delete('/room/:id', 'RoomController.delete')
+Route.get('/room', 'RoomController.index')
