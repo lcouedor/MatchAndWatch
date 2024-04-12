@@ -2,6 +2,7 @@
 
 const Room = use('App/Models/Room')
 const Watcher = use('App/Models/Watcher')
+const TMDBService = use('App/Services/TMDBService')
 
 class RoomController {
 	/**
@@ -17,6 +18,13 @@ class RoomController {
 			const { room_size, bucket_size } = request.only(['room_size', 'bucket_size'])
 			const code = await Room.createCode()
 			const room = await Room.create({ code, room_size, bucket_size })
+
+			//On récupère des films aléatoires depuis l'API TMDB
+			const tmdbService = new TMDBService(process.env.TMDB_API_KEY)
+			//TODO mettre les variables dans un fichier dédié, comme ici pour la taille max du bucket et de la room
+			const movies = await tmdbService.getRandomMovies(Math.min(bucket_size,10)*Math.min(room_size, 5))
+			console.log('Movies:', movies)
+
 			return response.status(201).json(room)
 		} catch (error) {
 			console.error(error)
