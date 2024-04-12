@@ -27,5 +27,8 @@ Route.get('/watcher', 'WatcherController.index')
 
 //Routes des rooms
 Route.post('/room', 'RoomController.create')
-Route.delete('/room/:id', 'RoomController.delete')
+Route.delete('/room', 'RoomController.delete')
 Route.get('/room', 'RoomController.index')
+Route.post('/room/join', 'RoomController.join')
+Route.get('/room/:code', 'RoomController.getByCode')
+Route.delete('/room/leave', 'RoomController.leave')

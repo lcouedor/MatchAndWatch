@@ -5,12 +5,22 @@ const Model = use('Model')
 
 class Room extends Model {
     //Les propriétés de la classe
+    static get table() {
+        return 'rooms'
+    }
+
+    static get tableColumns() {
+        return ['id', 'code', 'room_size', 'bucket_size']
+    }
+
     static get fillable() {
         return ['code', 'room_size', 'bucket_size']
     }
 
-    membres() {
-        return this.belongsToMany('App/Models/Watcher').pivotModel('App/Models/WatcherInRoom')
+    watchers() {
+        return this.belongsToMany('App/Models/Watcher')
+            .pivotModel('App/Models/WatcherInRoom')
+            .withPivot(['step'])
     }
 
     static async createCode() {
@@ -22,6 +32,8 @@ class Room extends Model {
         let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
         do {
+            code = '';
+
             // Generate a random 4 caracter code
             for (let i = 0; i < 4; i++) {
                 code += characters.charAt(Math.floor(Math.random() * characters.length))
@@ -44,6 +56,10 @@ class Room extends Model {
         }
 
         return code;
+    }
+
+    static async isWatcherIsInRoom(watcher, room) {
+        return await room.watchers().where('watcher_id', watcher.id).first() !== null
     }
 }
 

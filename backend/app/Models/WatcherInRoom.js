@@ -5,6 +5,10 @@ const Model = use('Model')
 
 class WatcherInRoom extends Model {
     //Les propriétés de la classe
+    static get table() {
+        return 'watcher_in_room'
+    }
+    
     static get fillable() {
         return ['room_id', 'watcher_id', 'step']
     }
