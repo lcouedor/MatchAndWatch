@@ -38,7 +38,6 @@ class WatcherController {
             return response.status(500).json({ error: 'Could not list watchers' })
         }
     }
-
     
 }
 

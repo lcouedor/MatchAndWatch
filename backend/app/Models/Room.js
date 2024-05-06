@@ -17,12 +17,18 @@ class Room extends Model {
         return ['code', 'room_size', 'bucket_size']
     }
 
-    watchers() {
-        return this.belongsToMany('App/Models/Watcher')
-            .pivotModel('App/Models/WatcherInRoom')
-            .withPivot(['step'])
+    watchers () {
+        return this.hasMany('App/Models/Watcher', 'id', 'idRoom')
     }
 
+    films(){
+        return this.hasMany('App/Models/FilmsRoom', 'id', 'room_id')
+    }
+
+    bucket(){
+        return this.hasMany('App/Models/BucketRoom', 'id', 'room_id')
+    }
+    
     static async createCode() {
         // Maximum number of attempts to generate a unique code
         const maxAttempts = 10;
@@ -59,7 +65,12 @@ class Room extends Model {
     }
 
     static async isWatcherIsInRoom(watcher, room) {
-        return await room.watchers().where('watcher_id', watcher.id).first() !== null
+        return await room.watchers().where('id', watcher.id).first() !== null
+    }
+
+    static async minStep(room) {
+        let minStep = await room.watchers().min('step')
+        return minStep[0]['min(`step`)']
     }
 }
 

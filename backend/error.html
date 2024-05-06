@@ -697,32 +697,12 @@
             <h3 class="error-status">500</h3>
 
             <div class="error-title">
-                <h4 class="error-name"> Error </h4>
-                <h2 class="error-message"> Cannot find module &#39;axios&#39;
-                    Require stack:
-                    -
-                    &#x2F;Users&#x2F;leocouedor&#x2F;Documents&#x2F;Projets&#x2F;matchAndWatch&#x2F;backend&#x2F;app&#x2F;Services&#x2F;TMDBService.js
-                    -
-                    &#x2F;Users&#x2F;leocouedor&#x2F;Documents&#x2F;Projets&#x2F;matchAndWatch&#x2F;backend&#x2F;node_modules&#x2F;require-stack&#x2F;src&#x2F;index.js
-                    -
-                    &#x2F;Users&#x2F;leocouedor&#x2F;Documents&#x2F;Projets&#x2F;matchAndWatch&#x2F;backend&#x2F;node_modules&#x2F;require-stack&#x2F;index.js
-                    -
-                    &#x2F;Users&#x2F;leocouedor&#x2F;Documents&#x2F;Projets&#x2F;matchAndWatch&#x2F;backend&#x2F;node_modules&#x2F;@adonisjs&#x2F;fold&#x2F;src&#x2F;Ioc&#x2F;index.js
-                    -
-                    &#x2F;Users&#x2F;leocouedor&#x2F;Documents&#x2F;Projets&#x2F;matchAndWatch&#x2F;backend&#x2F;node_modules&#x2F;@adonisjs&#x2F;fold&#x2F;index.js
-                    -
-                    &#x2F;Users&#x2F;leocouedor&#x2F;Documents&#x2F;Projets&#x2F;matchAndWatch&#x2F;backend&#x2F;server.js
-                </h2>
+                <h4 class="error-name"> SyntaxError </h4>
+                <h2 class="error-message"> Identifier &#39;BucketRoom&#39; has already been declared const BucketRoom
+                    &#x3D; use(&#39;App&#x2F;Models&#x2F;BucketRoom&#39;) </h2>
                 <p class="error-links">
-                    <a href="https://forum.adonisjs.com/search?q=Cannot find module 'axios'
-Require stack:
-- /Users/leocouedor/Documents/Projets/matchAndWatch/backend/app/Services/TMDBService.js
-- /Users/leocouedor/Documents/Projets/matchAndWatch/backend/node_modules/require-stack/src/index.js
-- /Users/leocouedor/Documents/Projets/matchAndWatch/backend/node_modules/require-stack/index.js
-- /Users/leocouedor/Documents/Projets/matchAndWatch/backend/node_modules/@adonisjs/fold/src/Ioc/index.js
-- /Users/leocouedor/Documents/Projets/matchAndWatch/backend/node_modules/@adonisjs/fold/index.js
-- /Users/leocouedor/Documents/Projets/matchAndWatch/backend/server.js" target="_blank"
-                        title="Search on the official forum"><i class="fab fa-discourse"></i></a>
+                    <a href="https://forum.adonisjs.com/search?q=Identifier 'BucketRoom' has already been declared const BucketRoom = use('App/Models/BucketRoom')"
+                        target="_blank" title="Search on the official forum"><i class="fab fa-discourse"></i></a>
                     <a href="https://discordapp.com/invite/vDcEjq6" target="_blank"
                         title="Join the official Discord server"><i class="fab fa-discord"></i></a>
                 </p>
@@ -745,158 +725,28 @@ Require stack:
 
                     <div class="frames-list">
 
-                        <div class="frame-row active native-frame">
+                        <div class="frame-row active">
                             <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1142:15
+                                app&#x2F;Controllers&#x2F;Http&#x2F;RoomController.js:8:7
                             </div>
                             <div class="frame-row-code">
-                                Module._resolveFilename
+                                const BucketRoom &#x3D; use(&#39;App&#x2F;Models&#x2F;BucketRoom&#39;)
                             </div>
-                            <div class="frame-context" data-start="" data-line="1142"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader"
-                                data-method="Module._resolveFilename" data-line-column="1142:15">
+                            <div class="frame-context" data-start="3" data-line="8"
+                                data-file="app&#x2F;Controllers&#x2F;Http&#x2F;RoomController.js"
+                                data-method="const BucketRoom &#x3D; use(&#39;App&#x2F;Models&#x2F;BucketRoom&#39;)"
+                                data-line-column="8:7">const BucketRoom &#x3D;
+                                require(&quot;..&#x2F;..&#x2F;Models&#x2F;BucketRoom&quot;)
 
+                                const Room &#x3D; use(&#39;App&#x2F;Models&#x2F;Room&#39;)
+                                const Watcher &#x3D; use(&#39;App&#x2F;Models&#x2F;Watcher&#39;)
+                                const FilmsRoom &#x3D; use(&#39;App&#x2F;Models&#x2F;FilmsRoom&#39;)
+                                const BucketRoom &#x3D; use(&#39;App&#x2F;Models&#x2F;BucketRoom&#39;)
+                                const TMDBService &#x3D; use(&#39;App&#x2F;Services&#x2F;TMDBService&#39;)
 
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:983:27
-                            </div>
-                            <div class="frame-row-code">
-                                Module._load
-                            </div>
-                            <div class="frame-context" data-start="" data-line="983"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader" data-method="Module._load"
-                                data-line-column="983:27">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1230:19
-                            </div>
-                            <div class="frame-row-code">
-                                Module.require
-                            </div>
-                            <div class="frame-context" data-start="" data-line="1230"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader" data-method="Module.require"
-                                data-line-column="1230:19">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;helpers:179:18
-                            </div>
-                            <div class="frame-row-code">
-                                require
-                            </div>
-                            <div class="frame-context" data-start="" data-line="179"
-                                data-file="node:internal&#x2F;modules&#x2F;helpers" data-method="require"
-                                data-line-column="179:18">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row ">
-                            <div class="frame-row-filepath">
-                                app&#x2F;Services&#x2F;TMDBService.js:3:15
-                            </div>
-                            <div class="frame-row-code">
-
-                            </div>
-                            <div class="frame-context" data-start="1" data-line="3"
-                                data-file="app&#x2F;Services&#x2F;TMDBService.js" data-method=""
-                                data-line-column="3:15">&#39;use strict&#39;;
-
-                                const axios &#x3D; require(&#39;axios&#39;);
-
-                                class TMDBService {
-                                constructor(apiKey) {
-                                this.apiKey &#x3D; apiKey;
-                                this.baseURL &#x3D; &#39;https:&#x2F;&#x2F;api.themoviedb.org&#x2F;3&#39;;
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1368:14
-                            </div>
-                            <div class="frame-row-code">
-                                Module._compile
-                            </div>
-                            <div class="frame-context" data-start="" data-line="1368"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader"
-                                data-method="Module._compile" data-line-column="1368:14">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1426:10
-                            </div>
-                            <div class="frame-row-code">
-                                Module._extensions..js
-                            </div>
-                            <div class="frame-context" data-start="" data-line="1426"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader"
-                                data-method="Module._extensions..js" data-line-column="1426:10">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1205:32
-                            </div>
-                            <div class="frame-row-code">
-                                Module.load
-                            </div>
-                            <div class="frame-context" data-start="" data-line="1205"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader" data-method="Module.load"
-                                data-line-column="1205:32">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1021:12
-                            </div>
-                            <div class="frame-row-code">
-                                Module._load
-                            </div>
-                            <div class="frame-context" data-start="" data-line="1021"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader" data-method="Module._load"
-                                data-line-column="1021:12">
-
-
-                            </div>
-                        </div>
-
-                        <div class="frame-row native-frame">
-                            <div class="frame-row-filepath">
-                                node:internal&#x2F;modules&#x2F;cjs&#x2F;loader:1230:19
-                            </div>
-                            <div class="frame-row-code">
-                                Module.require
-                            </div>
-                            <div class="frame-context" data-start="" data-line="1230"
-                                data-file="node:internal&#x2F;modules&#x2F;cjs&#x2F;loader" data-method="Module.require"
-                                data-line-column="1230:19">
-
-
+                                class RoomController {
+                                &#x2F;**
+                                * Create a new room.
                             </div>
                         </div>
                     </div>
@@ -910,7 +760,7 @@ Require stack:
             <table>
                 <tr>
                     <td class="title"> URI </td>
-                    <td> &#x2F;room?room_size&#x3D;2&amp;bucket_size&#x3D;5 </td>
+                    <td> &#x2F;room&#x2F;addFilmBucket </td>
                 </tr>
 
                 <tr>
@@ -933,6 +783,10 @@ Require stack:
 
             <table>
                 <tr>
+                    <td class="title"> CONTENT-TYPE </td>
+                    <td> application&#x2F;json </td>
+                </tr>
+                <tr>
                     <td class="title"> USER-AGENT </td>
                     <td> PostmanRuntime&#x2F;7.37.3 </td>
                 </tr>
@@ -946,7 +800,7 @@ Require stack:
                 </tr>
                 <tr>
                     <td class="title"> POSTMAN-TOKEN </td>
-                    <td> 06dae441-a97e-45bd-bad0-16fa97ea8d2e </td>
+                    <td> 6e435f8c-ae14-4a2a-8bd7-a89abecb0f17 </td>
                 </tr>
                 <tr>
                     <td class="title"> HOST </td>
@@ -958,7 +812,7 @@ Require stack:
                 </tr>
                 <tr>
                     <td class="title"> CONTENT-LENGTH </td>
-                    <td> 0 </td>
+                    <td> 96 </td>
                 </tr>
             </table>
 

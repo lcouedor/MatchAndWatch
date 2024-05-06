@@ -4,17 +4,20 @@
 const Model = use('Model')
 
 class Watcher extends Model {
-    //Les propriétés de la classe
-    static get table() { //Nom de la table dans la base de données
-        return 'watcher'
+    static get table() {
+        return 'watcher';
+    }
+
+    static get tableColumns() {
+        return ['id', 'name', 'created_at', 'updated_at', 'idRoom', 'step'];
     }
 
     static get fillable() {
-        return ['name']
+        return ['name', 'idRoom', 'step'];
     }
 
-    rooms() {
-        return this.belongsToMany('App/Models/Room').pivotModel('App/Models/WatcherInRoom')
+    room() {
+        return this.belongsTo('App/Models/Room', 'idRoom', 'id')
     }
 }
 

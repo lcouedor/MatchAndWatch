@@ -5,8 +5,6 @@ class TMDBService {
     constructor(apiKey) {
         this.apiKey = apiKey;
         this.baseURL = 'https://api.themoviedb.org/3';
-
-        //TODO essayer de passer sur la V4 pour ne plus avoir de limite de requêtes
     }
 
     getParams() {
