@@ -6,6 +6,13 @@ const FilmsRoom = use('App/Models/FilmsRoom')
 const BucketRoom = use('App/Models/BucketRoom')
 const TMDBService = use('App/Services/TMDBService')
 
+const Server = use('Server');
+const io = require('socket.io')(Server.getInstance(), {
+	cors: {
+		origin: '*', // Autorise toutes les origines
+	},
+});
+
 class RoomController {
 	/**
 	 * Create a new room.
@@ -24,7 +31,7 @@ class RoomController {
 			//On récupère des films aléatoires depuis l'API TMDB
 			const tmdbService = new TMDBService(process.env.TMDB_API_KEY)
 			//TODO mettre les variables dans un fichier dédié, comme ici pour la taille max du bucket et de la room
-			const films = await tmdbService.getRandomMovies(Math.min(bucket_size,10)*Math.min(room_size, 5))
+			const films = await tmdbService.getRandomMovies(Math.min(bucket_size, 10) * Math.min(room_size, 5))
 			console.log('Movies:', films)
 
 			//On ajoute des lignes dans la table films_rooms pour chaque film
@@ -112,7 +119,7 @@ class RoomController {
 			room.watchers = watchers.rows.map(watcher => {
 				return { id: watcher.id, name: watcher.name, step: watcher.step }
 			})
-			
+
 			//On ajoute les films à la room
 			room.films = films.rows.map(film => film.film_id)
 
@@ -140,6 +147,7 @@ class RoomController {
 	 * @returns {Object} The response object with the status and message.
 	 */
 	async join({ request, response }) {
+		io.emit('newMessage', 'coucou bouh')
 		try {
 			const { code, watcher_name } = request.only(['code', 'watcher_name'])
 
@@ -155,7 +163,7 @@ class RoomController {
 			}
 
 			//On crée un watcher
-			const watcher = await Watcher.create({ name: watcher_name, idRoom: room.id})
+			const watcher = await Watcher.create({ name: watcher_name, idRoom: room.id })
 
 			return response.status(200).json({ success: true, message: 'Watcher with id ' + watcher.id + ' joined room with code ' + code })
 		} catch (error) {
@@ -256,7 +264,7 @@ class RoomController {
 			//On ajoute les films au bucket de la room avec un poids de 0
 			for (let film of uniqueFilms) {
 				//On n'autorise pas de rajouter un film déjà présent dans le bucket
-				if(existingBucketIds.includes(film)){
+				if (existingBucketIds.includes(film)) {
 					continue
 				}
 				await BucketRoom.create({ idRoom: room.id, idWatcher: watcher.id, idFilm: film, weight: 0 })
@@ -274,7 +282,7 @@ class RoomController {
 	}
 
 	async watcherVoteForFilm({ request, response }) {
-		try{
+		try {
 			const { code, watcher_id, films } = request.only(['code', 'watcher_id', 'films'])
 
 			const room = await Room.findBy('code', code)
@@ -295,7 +303,7 @@ class RoomController {
 			}
 
 			//On vérifie que tous les watchers de la room soient à l'étape 2
-			if(await Room.minStep(room) < 2){
+			if (await Room.minStep(room) < 2) {
 				return response.status(400).json({ error: 'Not all watchers have added films to the bucket' })
 			}
 
@@ -316,8 +324,8 @@ class RoomController {
 			//On supprime les doublons dans les films donnés pour le vote
 			let uniqueFilms = []
 			let uniqueFilmsIds = []
-			for(let film of films){
-				if(!uniqueFilmsIds.includes(film.id)){
+			for (let film of films) {
+				if (!uniqueFilmsIds.includes(film.id)) {
 					uniqueFilms.push(film)
 					uniqueFilmsIds.push(film.id)
 				}
@@ -337,7 +345,7 @@ class RoomController {
 			//TODO regarder si tous les watchers ont voté pour passer aux résultats
 
 			return response.status(200).json({ success: true, message: 'Films voted successfully' })
-		}catch(error){
+		} catch (error) {
 			console.error(error)
 			return response.status(500).json({ error: 'Could not vote for films' })
 		}
