@@ -69,8 +69,25 @@ class Room extends Model {
     }
 
     static async minStep(room) {
-        let minStep = await room.watchers().min('step')
-        return minStep[0]['min(`step`)']
+        //Si la salle n'a pas de watcher, on throw une erreur
+        if (room.watchers.length === 0) {
+            //On tente d'une autre manière si la première ne fonctionne pas
+            try{
+                let minStep = await room.watchers().min('step')
+                return minStep[0]['min(`step`)']
+            } catch (e) {
+                //en cas d'erreur, on throw une erreur
+                throw new Error('No watcher in the room')
+            }
+        }
+        let minStep = 10;
+        for (let i = 0; i < room.watchers.length; i++) {
+            if (room.watchers[i].step < minStep) {
+                minStep = room.watchers[i].step
+            }
+        }
+
+        return minStep
     }
 }
 

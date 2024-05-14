@@ -31,7 +31,9 @@ class RoomController {
 			//On récupère des films aléatoires depuis l'API TMDB
 			const tmdbService = new TMDBService(process.env.TMDB_API_KEY)
 			//TODO mettre les variables dans un fichier dédié, comme ici pour la taille max du bucket et de la room
-			const films = await tmdbService.getRandomMovies(Math.min(bucket_size, 10) * Math.min(room_size, 5))
+			let nbMovies = Math.min(bucket_size, 10) * Math.min(room_size*2, 5)
+			nbMovies = 4
+			const films = await tmdbService.getRandomMovies(nbMovies)
 			console.log('Movies:', films)
 
 			//On ajoute des lignes dans la table films_rooms pour chaque film
@@ -129,6 +131,10 @@ class RoomController {
 				return { id: bucket.id, idFilm: bucket.idFilm, weight: bucket.weight }
 			})
 
+
+			//On affiche le step de la room
+			room.minStep = await Room.minStep(room)
+
 			return response.status(200).json(room)
 		} catch (error) {
 			console.error(error)
@@ -147,7 +153,6 @@ class RoomController {
 	 * @returns {Object} The response object with the status and message.
 	 */
 	async join({ request, response }) {
-		io.emit('newMessage', 'coucou bouh')
 		try {
 			const { code, watcher_name } = request.only(['code', 'watcher_name'])
 
@@ -165,7 +170,10 @@ class RoomController {
 			//On crée un watcher
 			const watcher = await Watcher.create({ name: watcher_name, idRoom: room.id })
 
-			return response.status(200).json({ success: true, message: 'Watcher with id ' + watcher.id + ' joined room with code ' + code })
+			//On envoie un message à tous les watchers de la room pour leur dire qu'un nouveau watcher a rejoint la room
+			io.emit(`updateRoom:${code}`, 'update')
+
+			return response.status(200).json({ success: true, watcher: watcher, roomCode: room.code, message: 'Watcher with id ' + watcher.id + ' joined room with code ' + code })
 		} catch (error) {
 			console.error(error)
 			return response.status(500).json({ error: 'Could not join room' })
@@ -274,6 +282,9 @@ class RoomController {
 			watcher.step = 2
 			await watcher.save()
 
+			//On envoie un message à tous les watchers de la room pour leur dire qu'un watcher a ajouté des films au bucket
+			io.emit(`updateRoom:${code}`, 'update')
+
 			return response.status(200).json({ success: true, message: 'Films added to rooms\'s bucket' })
 		} catch (error) {
 			console.error(error)
@@ -303,7 +314,8 @@ class RoomController {
 			}
 
 			//On vérifie que tous les watchers de la room soient à l'étape 2
-			if (await Room.minStep(room) < 2) {
+			room.minStep = await Room.minStep(room)
+			if (room.minStep !== 2) {
 				return response.status(400).json({ error: 'Not all watchers have added films to the bucket' })
 			}
 
@@ -342,7 +354,12 @@ class RoomController {
 			watcher.step = 3
 			await watcher.save()
 
-			//TODO regarder si tous les watchers ont voté pour passer aux résultats
+			//On vérifie si tous les watchers ont voté
+			room.minStep = await Room.minStep(room)
+			if (room.minStep === 3) {
+				//On envoie un message à tous les watchers de la room pour leur dire que les résultats sont prêts
+				io.emit(`updateRoom:${code}`, 'results')
+			}
 
 			return response.status(200).json({ success: true, message: 'Films voted successfully' })
 		} catch (error) {
