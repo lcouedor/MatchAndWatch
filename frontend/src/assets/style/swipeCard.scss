@@ -1,0 +1,120 @@
+@use 'variables' as *;
+
+.containerFilms{
+    position: relative;
+    height: 44vh; //La hauteur de la carte + 2vh de marge en haut et en bas
+}
+
+.backgroundCard, .swipeCard{
+    height: 40vh;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    img{
+        height: 40vh;
+        border-radius: 15px;
+    }
+}
+
+.backgroundCard img{
+    margin-top: 2vh;
+    filter: blur(10px);
+}
+
+.titre{
+    color: $textColorPrimary;
+    font-size: 2em;
+
+    display: table-cell;
+    text-align: center;
+    
+}
+
+.swipeCard{
+    height: 100vh;
+    padding: 2vh;
+    position: relative;
+
+
+    .parentImage{
+        overflow: hidden;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+
+        transform-origin: center;
+
+        border-radius: 15px;
+
+        display: flex;
+
+        img{
+            position: relative;
+            top: 0;
+        }
+    }
+}
+
+#leftZone, #rightZone{
+    pointer-events: none;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    span{
+        font-size: $sousTitreFontSizes;
+        color: $textColorSecondary;
+        position: absolute;
+        bottom: 1%;
+
+        //Le texte à une ombre portée
+        text-shadow: 3px 3px $secondaryColor;
+        background-color: #d4e09b79;
+        border: 2px solid $textColorPrimary;
+        border-radius: $stdRadius;
+
+        display: flex;
+        justify-content: center;
+        padding: 1vh;
+    
+    }
+
+    .background{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    
+        opacity: 0;
+    }
+}
+
+#leftZone{
+    .background{
+        background-color: red;
+        
+    }
+    span{
+        right: 2%;
+    }
+}
+
+#rightZone{
+    .background{
+        background-color: green;
+    }
+    span{
+        left: 2%;
+    }
+}
+
+.overviewZone{
+    padding: 2vh;
+    font-size: $textFontSizes;
+    color: $textColorSecondary;
+    text-align: justify;
+}

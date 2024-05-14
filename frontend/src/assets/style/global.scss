@@ -1,0 +1,273 @@
+@use 'variables' as *;
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    z-index: 2;
+    position: relative;
+
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+body{
+    overflow: hidden;
+}
+
+#mainApp{
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+
+    background: rgb(122,48,108);
+    background: linear-gradient(180deg, rgba(122,48,108,1) 0%, rgba(254,201,241,1) 100%);
+
+}
+
+h1{
+    width: 100vw;
+    height: 10vh;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+
+    padding: 2vh;
+
+    color: $textColorPrimary;
+    font-size: 2em;
+
+    text-transform: uppercase;
+
+    //mettre le titre en valeur
+    text-shadow: 3px 3px $textColorSecondary;
+
+    transition: all 0.3s;
+
+    &:hover{
+        text-shadow: 5px 5px $textColorSecondary;
+
+        transition: all 0.3s;
+    }
+}
+
+.buttonsHome, .buttonsModal{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 20vh;
+}
+
+.buttonsModal{
+    margin-top: 2vh;
+}
+
+.info{
+    border-radius: 50vh;
+    color: $textColorPrimary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 5vh;
+    height: 5vh;
+    font-size: $titreFontSizes;
+    border: 2px solid $textColorPrimary;
+
+    &:hover{
+        background-color: $accentColor;
+        color: $textColorSecondary;
+    }
+
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5vh;
+}
+
+.inputBloc{
+    label{
+        display: flex;
+        justify-content: center;
+        padding: 1vh;
+        font-size: $sousTitreFontSizes;
+    }
+
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 5vh;
+}
+
+select, input{
+    background-color: transparent;
+    color: $textColorPrimary;
+    border-radius: $stdRadius;
+    padding: 2vh;
+    font-size: $textFontSizes;
+    border: 2px solid $borderColor;
+}
+
+.errorInput{
+    border: 2px solid red;
+}
+
+.errorMessage{
+    color: red;
+    font-size: $textFontSizes;
+    text-align: center;
+}
+
+.waiting{
+    display: none;
+    align-items: center;
+
+    .spin{
+        margin-left: 2vh;
+        margin-right: 2vh;
+        animation: spin 1s linear infinite;
+        width: 5vh;
+        height: 5vh;
+
+        //Un cercle avec un dégradé
+        background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)) padding-box,linear-gradient(to right, $primaryColor, $accentColor) border-box;
+        border-radius: 50em;
+        border: 4px solid transparent;
+
+        //Un halo autour du cercle
+        box-shadow: 0 0 0 1px $primaryColor, 0 0 0 2px $accentColor;
+    }
+}
+
+.waitingVisible{
+    display: flex;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.bodyApp{
+    max-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.bandeauSwipe{
+    width: 100vw;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: $sousTitreFontSizes;
+    color: $textColorPrimary;
+}
+
+.normalButton{
+    background-color: $accentColor;
+    color: $textColorSecondary;
+    border: 2px solid $borderColor;
+    border-radius: $stdRadius;
+    padding: 1vh;
+    font-size: .8em;
+}
+
+.headerMain{
+    height: 10vh;
+    display: flex;
+    align-items: center;
+    padding: 2vh;
+    justify-content: space-around;
+
+    .leftRoom{
+        border-radius: $stdRadius;
+        padding: 2vh;
+        font-size: $textFontSizes;
+        border: 2px solid $borderColor;
+        background-color: $accentColor;
+    }
+
+    .copyZone{
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+        width: 50%;
+        font-size: $sousTitreFontSizes;
+        color: $textColorSecondary;
+        border-radius: $stdRadius;
+        border: 2px dashed $borderColor;
+
+        background-color: $accentColor;
+        position: relative;
+
+        span{
+            position: absolute;
+            right: 5%;
+            height: 70%;
+
+            img{
+                height: 100%;
+                transform: rotateY(90deg);
+                transition: all 0.3s;
+            }
+        }
+
+        .symbolVisible img{
+            transform: rotateY(0deg);
+            transition: all 0.3s;
+        }
+    }
+}
+
+.listFilmsToRate{
+    display: flex;
+    flex-direction: column;
+    background-color: red;
+    height: 90vh;
+    overflow: auto;
+
+    &>div{
+        display: flex;
+        flex-direction: column;
+    }
+
+    img{
+        width: 70vw;
+    }
+}
+
+.ratingBoxes{
+    display: flex;
+    flex-direction: row;
+    &>div{
+        border-radius: 50px;
+        border: 2px solid $borderColor;
+        height: 5vh;
+        width: 5vh;
+    }
+}
+
+.boxSelected{
+    background-color: blue;
+}
+
+.resultList{
+    height: 90vh;
+    overflow: auto;
+    img{
+        width: 10vw;
+    }
+    div{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    &>div:nth-child(1){ //Le premier élément
+        font-size: $titreFontSizes;
+        img{
+            width: 50vw;
+        }
+    }
+}

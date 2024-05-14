@@ -1,31 +1,44 @@
 <template>
-  <div class="home">
 
-    <button @click="joinRoom">Rejoindre une room</button>
-  </div>
+	<h1>Match & Watch</h1>
+
+	<div class="buttonsHome">
+		<CustomBtn text="Créer une Room" @click="showModal('modaleCreateRoom')" />
+		<CustomBtn text="Rejoindre une Room" @click="showModal('modaleJoinRoom')" />
+	</div>
+
+	<div class="info" @click="showModal('modaleInfo')">i</div>
+
+	<ModaleInfo />
+	<ModaleCreateRoom />
+	<ModaleJoinRoom />
+
 </template>
 
-<script lang="ts">
-import { defineComponent } from "vue";
-import HelloWorld from "@/components/HelloWorld.vue"; // @ is an alias to /src
-import * as requests from "@/api/services";
+<script>
+import CustomBtn from '@/components/Button.vue';
+import ModaleInfo from '@/modales/ModaleInfo.vue';
+import ModaleCreateRoom from '@/modales/ModaleCreateRoom.vue';
+import ModaleJoinRoom from '@/modales/ModaleJoinRoom.vue';
 
-export default defineComponent({
-  name: "HomeView",
-  components: {
-    HelloWorld,
-  },
+export default {
 
-  async mounted() {
-    let rooms = await requests.getAll("room");
-    console.log(rooms);
-  },
+	name: "HomeView",
+	components: {
+		CustomBtn,
+		ModaleInfo,
+		ModaleCreateRoom,
+		ModaleJoinRoom,
+	},
+	methods: {
 
-  methods: {
-    async joinRoom() {
-      await requests.post("room/join", { code: "S36T", watcher_name: "test"});
+		showModal(modal) {
+			document.getElementById(modal).classList.add("showModal");
+		},
 
-    },
-  },
-});
+		hideModal(modal) {
+			document.getElementById(modal).classList.remove("showModal");
+		},
+	},
+};
 </script>
