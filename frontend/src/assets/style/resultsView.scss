@@ -1,0 +1,59 @@
+@use 'variables' as *;
+
+.resultList{
+    height: 90vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+
+    .imgContainer{
+        margin-top: 3vh;
+        margin-bottom: 3vh;
+        position: relative;
+        height: 40vh;
+        width: 100vw;
+
+        img{
+            position: absolute;
+            height: 40vh;
+
+            &:nth-child(1){
+                filter: blur(20px);
+            }
+        }
+    }
+
+    div{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dataFilm{
+        display: flex;
+        flex-direction: row;
+
+        .left{
+            width: 70%;
+
+            p{
+                text-align: justify;
+                padding: 2vh;
+                height: 40vh;
+                overflow-y: auto;
+            }
+        }
+
+        .right{
+            width: 30%;
+
+            .note{
+                display: table-cell;
+                text-align: center;
+                margin-bottom: 2vh;
+            }
+        }
+    }
+   
+}

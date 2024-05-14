@@ -1,5 +1,16 @@
 @use 'variables' as *;
 
+.bandeauSwipe{
+    width: 100vw;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: $sousTitreFontSizes;
+    color: $textColorPrimary;
+}
+
 .containerFilms{
     position: relative;
     height: 44vh; //La hauteur de la carte + 2vh de marge en haut et en bas
@@ -24,6 +35,7 @@
 .titre{
     color: $textColorPrimary;
     font-size: 2em;
+    width: 100vw;
 
     display: table-cell;
     text-align: center;
@@ -113,6 +125,8 @@
 }
 
 .overviewZone{
+    max-height: 30vh;
+    overflow-y: auto;
     padding: 2vh;
     font-size: $textFontSizes;
     color: $textColorSecondary;

@@ -4,19 +4,28 @@
     </div>
 
     <div v-else class="listFilmsToRate">
-        <div v-for="film in films" :id="`cardFilm${film.id}`">
-            {{ film.title }}
-            <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
+        <div v-for="film in films" :id="`cardFilm${film.id}`" class="cardFilmContainer">
+            <div class="titre">{{ film.title }}</div>
+            <div class="cardImg">
+                <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
+                <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film" class="blurImg">
+                <div class="overviewCardZone">
+                    {{ film.overview }}
+                </div>
+            </div>
             <div class="ratingBoxes">
-                <div class="nono" @click="setNote(film.id,'nono')"></div>
-                <div class="no" @click="setNote(film.id,'no')"></div>
-                <div class="neutral" @click="setNote(film.id,'neutral')"></div>
-                <div class="ok" @click="setNote(film.id,'ok')"></div>
-                <div class="okok" @click="setNote(film.id,'okok')"></div>
+                <div class="nono" @click="setNote(film.id,'nono')">✓</div>
+                <div class="no" @click="setNote(film.id,'no')">✓</div>
+                <div class="neutral" @click="setNote(film.id,'neutral')">✓</div>
+                <div class="ok" @click="setNote(film.id,'ok')">✓</div>
+                <div class="okok" @click="setNote(film.id,'okok')">✓</div>
             </div>
         </div>
 
-        <button @click="verifyRatings">Valider</button>
+        <div class="buttonsContainer">
+            <button class="normalButton" @click="verifyRatings">Voter</button>
+        </div>
+        
     </div>
     
 </template>
@@ -98,13 +107,21 @@ export default {
                     break;
             }
             film.note = note;
+
+            //Je scroll jusqu'au prochain film
+            let nextFilm = document.getElementById(`cardFilm${filmId}`).nextElementSibling;
+            if (nextFilm) {
+                nextFilm.scrollIntoView({ behavior: 'smooth' });
+            }
         },
 
         verifyRatings(){
             //TODO vérifier que tous les films ont une note
             for(let film of this.films){
                 if(film.note === undefined){
-                    alert('Veuillez noter tous les films');
+                    //Je scroll jusqu'au film sans note
+                    let filmElement = document.getElementById(`cardFilm${film.id}`);
+                    filmElement.scrollIntoView({ behavior: 'smooth' });
                     return;
                 }
             }

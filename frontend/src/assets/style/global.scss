@@ -147,20 +147,10 @@ select, input{
 }
 
 .bodyApp{
-    max-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-.bandeauSwipe{
-    width: 100vw;
-    padding: 1vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-size: $sousTitreFontSizes;
-    color: $textColorPrimary;
+    position: relative;
+    height: 100vh;
+    // overflow-y: auto;
+    // overflow-x: hidden;
 }
 
 .normalButton{
@@ -181,7 +171,6 @@ select, input{
 
     .leftRoom{
         border-radius: $stdRadius;
-        padding: 2vh;
         font-size: $textFontSizes;
         border: 2px solid $borderColor;
         background-color: $accentColor;
@@ -192,7 +181,6 @@ select, input{
         display: flex;
         align-items: center;
         justify-content: space-around;
-        width: 50%;
         font-size: $sousTitreFontSizes;
         color: $textColorSecondary;
         border-radius: $stdRadius;
@@ -201,10 +189,18 @@ select, input{
         background-color: $accentColor;
         position: relative;
 
+        .symbols{
+            height: 100%;
+            width: 30%;
+            position: relative;
+        }
+
         span{
             position: absolute;
-            right: 5%;
-            height: 70%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 60%;
 
             img{
                 height: 100%;
@@ -218,56 +214,14 @@ select, input{
             transition: all 0.3s;
         }
     }
-}
 
-.listFilmsToRate{
-    display: flex;
-    flex-direction: column;
-    background-color: red;
-    height: 90vh;
-    overflow: auto;
-
-    &>div{
-        display: flex;
-        flex-direction: column;
+    .copyZone, .leftRoom{
+        height: 100%;
+        width: 35%;
     }
 
-    img{
-        width: 70vw;
-    }
-}
-
-.ratingBoxes{
-    display: flex;
-    flex-direction: row;
-    &>div{
-        border-radius: 50px;
-        border: 2px solid $borderColor;
-        height: 5vh;
-        width: 5vh;
-    }
-}
-
-.boxSelected{
-    background-color: blue;
-}
-
-.resultList{
-    height: 90vh;
-    overflow: auto;
-    img{
-        width: 10vw;
-    }
-    div{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    &>div:nth-child(1){ //Le premier élément
-        font-size: $titreFontSizes;
-        img{
-            width: 50vw;
-        }
-    }
+    .info{
+        margin: 0;
+    }    
+    
 }

@@ -3,21 +3,34 @@
         <div class="headerMain">
             <div class="copyZone" @click="copyToClipboard">
                 {{ $route.params.roomCode }}
-                <span class="copySymbol symbolVisible">
-                    <img src="../assets/images/copy.png" alt="">
-                </span>
-                <span class="validCopySymbol">
-                    <img src="../assets/images/check.png" alt="">
-                </span>
+                <div class="symbols">
+                    <span class="copySymbol symbolVisible">
+                        <img src="../assets/images/copy.png" alt="">
+                    </span>
+                    <span class="validCopySymbol">
+                        <img src="../assets/images/check.png" alt="">
+                    </span>
+                </div>
+
             </div>
+
+            <span class="info" @click="displayInfo" v-if="userStep == 1 || userStep == 2">i</span>
+
             <button class="leftRoom" @click="leftRoom">Quitter la room</button>
+
+
         </div>
+
+        
 
         <SwipeView :room="room" :ready="ready" v-if="ready && userStep == 1" />
         <VoteView :room="room" :ready="ready" v-if="ready && userStep == 2" />
         <ResultsView :room="room" :ready="ready" v-if="ready && userStep == 3" />
 
+        <ModaleInfoMain :page="userStep" />
+
     </div>
+
 </template>
 
 <script>
@@ -28,6 +41,8 @@ import SwipeView from '@/views/SwipeView.vue';
 import VoteView from '@/views/VoteView.vue';
 import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
+import ModaleInfoMain from '@/modales/ModaleInfoMain.vue';
+
 
 
 const socket = io(apiURL);
@@ -49,7 +64,8 @@ export default {
         SwipeView,
         VoteView,
         ResultsView,
-        CustomBtn
+        CustomBtn,
+        ModaleInfoMain
     },
 
     async created() {
@@ -152,6 +168,10 @@ export default {
                 validCopySymbol.classList.remove('symbolVisible');
             }, 1000);
 
+        },
+
+        displayInfo() {
+            document.getElementById('modaleInfoMain').classList.toggle('showModal');
         }
     },
 };

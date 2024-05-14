@@ -34,8 +34,6 @@
         {{ currentFilm.overview }}
     </div>
 
-
-
 </template>
 
 <script>
