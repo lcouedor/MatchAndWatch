@@ -32,7 +32,6 @@ class RoomController {
 			const tmdbService = new TMDBService(process.env.TMDB_API_KEY)
 			//TODO mettre les variables dans un fichier dédié, comme ici pour la taille max du bucket et de la room
 			let nbMovies = Math.min(bucket_size, 10) * Math.min(room_size*2, 5)
-			nbMovies = 4
 			const films = await tmdbService.getRandomMovies(nbMovies)
 			console.log('Movies:', films)
 
