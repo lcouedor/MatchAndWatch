@@ -132,7 +132,8 @@ export default {
     methods: {
         async getFilms() {
             this.films = await Promise.all(this.room.data.bucket.map(async film => {
-                return await getMovie(film.idFilm);
+                let f = await getMovie(film.idFilm);
+                return f.data;
             }));
         },
 

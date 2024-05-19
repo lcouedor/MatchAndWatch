@@ -34,3 +34,6 @@ Route.get('/room/:code', 'RoomController.getByCode')
 Route.delete('/room/leave', 'RoomController.leave')
 Route.post('/room/addFilmBucket', 'RoomController.watcherAddFilmsToBucket')
 Route.post('/room/voteForFilm', 'RoomController.watcherVoteForFilm')
+
+//Routes annexes
+Route.get('/movie', 'RoomController.getMovie')

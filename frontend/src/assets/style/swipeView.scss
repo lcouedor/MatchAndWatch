@@ -13,7 +13,7 @@
 
 .containerFilms{
     position: relative;
-    height: 44vh; //La hauteur de la carte + 2vh de marge en haut et en bas
+    height: 44dvh; //La hauteur de la carte + 2vh de marge en haut et en bas
 }
 
 .backgroundCard, .swipeCard{
@@ -22,7 +22,7 @@
     left: 50%;
     transform: translateX(-50%);
     img{
-        height: 40vh;
+        height: 40dvh;
         border-radius: 15px;
     }
 }
@@ -43,7 +43,7 @@
 }
 
 .swipeCard{
-    height: 100vh;
+    height: 100dvh;
     padding: 2vh;
     position: relative;
 

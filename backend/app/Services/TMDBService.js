@@ -79,6 +79,21 @@ class TMDBService {
         }
     }
 
+    async getMovieDetails(movieId) {
+        try {
+            const response = await axios.get(`${this.baseURL}/movie/${movieId}`, {
+                params: {
+                    api_key: this.apiKey,
+                },
+            });
+
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching movie details from TMDB:', error);
+            throw new Error('Failed to fetch movie details from TMDB');
+        }
+    }
+
 
 
 }

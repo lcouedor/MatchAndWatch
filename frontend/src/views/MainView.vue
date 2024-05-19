@@ -21,7 +21,7 @@
 
         </div>
 
-        
+
 
         <SwipeView :room="room" :ready="ready" v-if="ready && userStep == 1" />
         <VoteView :room="room" :ready="ready" v-if="ready && userStep == 2" />
@@ -153,20 +153,25 @@ export default {
             this.updateRoom();
         },
 
-        copyToClipboard() {
-            navigator.clipboard.writeText(this.$route.params.roomCode);
+        async copyToClipboard() {
+            try {
+                await navigator.clipboard.writeText(this.$route.params.roomCode);
 
-            //On retire la classe symbolVisible et on l'ajoute à validCopySymbol
-            let copySymbol = document.querySelector('.copySymbol');
-            let validCopySymbol = document.querySelector('.validCopySymbol');
+                //On retire la classe symbolVisible et on l'ajoute à validCopySymbol
+                let copySymbol = document.querySelector('.copySymbol');
+                let validCopySymbol = document.querySelector('.validCopySymbol');
 
-            copySymbol.classList.remove('symbolVisible');
-            validCopySymbol.classList.add('symbolVisible');
+                copySymbol.classList.remove('symbolVisible');
+                validCopySymbol.classList.add('symbolVisible');
 
-            setTimeout(() => {
-                copySymbol.classList.add('symbolVisible');
-                validCopySymbol.classList.remove('symbolVisible');
-            }, 1000);
+                setTimeout(() => {
+                    copySymbol.classList.add('symbolVisible');
+                    validCopySymbol.classList.remove('symbolVisible');
+                }, 1000);
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                alert('Impossible de copier le code de la room');
+            }
 
         },
 

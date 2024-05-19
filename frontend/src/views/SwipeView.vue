@@ -49,7 +49,9 @@ export default {
             currentFilm: null,
 
             initialX: 0,
-            initialLeft: 0
+            initialLeft: 0,
+
+            isDragging: false,
 
         }
     },
@@ -79,7 +81,8 @@ export default {
     methods: {
         async getFilms() {
             this.films = await Promise.all(this.room.data.films.map(async film => {
-                return await getMovie(film);
+                let f = await getMovie(film);
+                return f.data;
             }));
 
             //Copie de films dans displayFilms
@@ -95,6 +98,8 @@ export default {
             //On récupère l'élement à déplacer horizontalement
             let card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
             this.initialLeft = card.getBoundingClientRect().left;
+
+            this.isDragging = true;
         },
 
         onDragMove(e) {

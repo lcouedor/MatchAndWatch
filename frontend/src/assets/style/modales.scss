@@ -2,7 +2,9 @@
 
 .modal{
     display: none;
-    height: 100vh;
+    //définir la hauteur à la taille max disponible
+    //Y compris sur mobile en prenant en compte la barre de navigation
+    height: 100dvh;
     width: 100vw;
     position: absolute;
     top: 0;

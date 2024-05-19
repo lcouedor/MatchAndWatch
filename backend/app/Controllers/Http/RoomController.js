@@ -13,6 +13,10 @@ const io = require('socket.io')(Server.getInstance(), {
 	},
 });
 
+const { translate } = require('bing-translate-api');
+const tmdbService = new TMDBService(process.env.TMDB_API_KEY)
+
+
 class RoomController {
 	/**
 	 * Create a new room.
@@ -23,15 +27,15 @@ class RoomController {
 	 * @returns {Object} The created room object.
 	 */
 	async create({ request, response }) {
+		console.log('Create room')
 		try {
 			const { room_size, bucket_size } = request.only(['room_size', 'bucket_size'])
 			const code = await Room.createCode()
 			const room = await Room.create({ code, room_size, bucket_size })
 
 			//On récupère des films aléatoires depuis l'API TMDB
-			const tmdbService = new TMDBService(process.env.TMDB_API_KEY)
 			//TODO mettre les variables dans un fichier dédié, comme ici pour la taille max du bucket et de la room
-			let nbMovies = Math.min(bucket_size, 10) * Math.min(room_size*2, 5)
+			let nbMovies = Math.min(bucket_size, 10) * Math.min(room_size * 2, 5)
 			const films = await tmdbService.getRandomMovies(nbMovies)
 			console.log('Movies:', films)
 
@@ -366,6 +370,31 @@ class RoomController {
 			return response.status(500).json({ error: 'Could not vote for films' })
 		}
 	}
+
+	async translate(text) {
+		try {
+			let res = await translate(text, 'en', 'fr')
+			return response.status(200).json({ text: res.translation })
+		} catch (error) {
+			console.log(error)
+			return response.status(500).json({ error: 'Could not translate' })
+		}
+	}
+
+	async getMovie({request, response}) {
+		try {
+			const { movieId } = request.only(['movieId'])
+			const movie = await tmdbService.getMovieDetails(movieId)
+
+			//On traduit la description du film
+			let translatedOverview = await translate(movie.overview, 'en', 'fr')
+			movie.overview = translatedOverview.translation
+			return response.status(200).json(movie)
+		} catch (error) {
+			console.error(error)
+			return response.status(500).json({ error: 'Could not get movie' })
+		}
+	  }
 
 }
 

@@ -1,9 +1,7 @@
 import axios from "axios";
 
+// export const apiURL = "https://matchandwatch.fun:3333";
 export const apiURL = "http://localhost:3333";
-export const filmsApiURL = "https://api.themoviedb.org/3";
-//La valeur contenue dans le fichier .env est accessible via process.env.NOM_VARIABLE
-const filmsApiKey = "923036efebe36b51b3db4967f6bb5644";
 
 export async function getAll(path: string): Promise<any> {
   try {
@@ -63,11 +61,19 @@ export async function get(path: string, data: any): Promise<any> {
 }
 
 export async function getMovie(movieId: number) {
-  const response = await axios.get(`${filmsApiURL}/movie/${movieId}`, {
-    params: {
-      api_key: filmsApiKey,
+  try{
+    let data = { params: { movieId: movieId } };
+    const response = await axios.get(`${apiURL}/movie`, data);
+    return { success: true, data: response.data }; // Retourne les données si tout va bien
+  } catch (error: any) {
+    if (error.response) {
+      // Le backend a renvoyé une réponse avec un code d'erreur
+      return { success: false, data: error.response.data.error };
+    } else if (error.request) {
+      console.error("Aucune réponse du serveur. Veuillez réessayer plus tard.");
+    } else {
+      console.error("Erreur lors de la requête:", error.message);
     }
-  });
-
-  return response.data;
+    return null;
+  }
 }
