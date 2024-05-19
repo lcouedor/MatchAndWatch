@@ -386,9 +386,14 @@ class RoomController {
 			const { movieId } = request.only(['movieId'])
 			const movie = await tmdbService.getMovieDetails(movieId)
 
-			//On traduit la description du film
-			let translatedOverview = await translate(movie.overview, 'en', 'fr')
-			movie.overview = translatedOverview.translation
+			//On essaie de traduire la description du film en français si possible
+			try {
+				let translatedOverview = await translate(movie.overview, 'en', 'fr')
+				movie.overview = translatedOverview.translation
+			}
+			catch (error) {
+				console.error(error)
+			}
 			return response.status(200).json(movie)
 		} catch (error) {
 			console.error(error)
