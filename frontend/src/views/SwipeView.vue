@@ -1,44 +1,44 @@
 <template>
-
-    <div class="bandeauSwipe">
-        {{ $parent.userBucket.length }}/{{ room.data.bucket_size }} films likés
-    </div>
-
-    <div class="titre" v-if="currentFilm">
-        <p>{{ currentFilm.title }}</p>
-    </div>
-
-    <div class="containerFilms">
-        <div v-for="film in displayFilms" class="backgroundCard">
-            <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
+    <div v-if="ready">
+        <div class="bandeauSwipe">
+            {{ $parent.userBucket.length }}/{{ room.data.bucket_size }} films likés
         </div>
 
-        <div v-if="currentFilm" class="swipeCard" id="swipeCard">
-            <div class="parentImage">
-                <img :src="`https://image.tmdb.org/t/p/w780/${currentFilm.poster_path}`" alt="Affiche du film"
-                    @touchstart="onDragStart" @touchmove="onDragMove" @touchend="onDragEnd">
-                <div id="leftZone">
-                    <div class="background"></div>
-                    <span>No Watch</span>
-                </div>
-                <div id="rightZone">
-                    <div class="background"></div>
-                    <span>Watch</span>
-                </div>
+        <div class="titre" v-if="currentFilm">
+            <p>{{ currentFilm.title }}</p>
+        </div>
+
+        <div class="containerFilms">
+            <div v-for="film in displayFilms" class="backgroundCard">
+                <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
             </div>
 
+            <div v-if="currentFilm" class="swipeCard" id="swipeCard">
+                <div class="parentImage">
+                    <img :src="`https://image.tmdb.org/t/p/w780/${currentFilm.poster_path}`" alt="Affiche du film"
+                        @touchstart="onDragStart" @touchmove="onDragMove" @touchend="onDragEnd">
+                    <div id="leftZone">
+                        <div class="background"></div>
+                        <span>No Watch</span>
+                    </div>
+                    <div id="rightZone">
+                        <div class="background"></div>
+                        <span>Watch</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="overviewZone" v-if="currentFilm">
+            {{ currentFilm.overview }}
         </div>
     </div>
 
-    <div class="overviewZone" v-if="currentFilm">
-        {{ currentFilm.overview }}
-    </div>
 
 </template>
 
 <script>
-import { getMovie } from '@/api/services';
-
 export default {
     name: 'SwipeView',
 
@@ -50,9 +50,6 @@ export default {
 
             initialX: 0,
             initialLeft: 0,
-
-            isDragging: false,
-
         }
     },
 
@@ -61,10 +58,14 @@ export default {
             type: Object,
             default: null
         },
+        movies: {
+            type: Array,
+            default: []
+        },
         ready: {
             type: Boolean,
             default: false
-        }
+        },
     },
 
     watch: {
@@ -72,36 +73,24 @@ export default {
             immediate: true,
             handler() {
                 if (this.ready) {
-                    this.getFilms();
+                    // Une fois que les films sont chargés, on les copie dans films
+                    this.films = this.movies;
+                    this.displayFilms = [...this.films];
+                    this.currentFilm = this.displayFilms.pop();
                 }
             }
         },
     },
 
     methods: {
-        async getFilms() {
-            this.films = await Promise.all(this.room.data.films.map(async film => {
-                let f = await getMovie(film);
-                return f.data;
-            }));
-
-            //Copie de films dans displayFilms
-            this.displayFilms = [...this.films];
-
-            this.currentFilm = this.displayFilms.pop();
-
-        },
-
+        //Les fonctions pour le swipe
         onDragStart(e) {
             this.initialX = e.touches[0].clientX;
 
             //On récupère l'élement à déplacer horizontalement
             let card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
             this.initialLeft = card.getBoundingClientRect().left;
-
-            this.isDragging = true;
         },
-
         onDragMove(e) {
             //On récupère l'élement à déplacer horizontalement
             let card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
@@ -152,7 +141,6 @@ export default {
 
 
         },
-
         onDragEnd() {
             let transitionDuration = 500;
 
@@ -228,7 +216,6 @@ export default {
                 }, transitionDuration);
             }
         }
-
     }
 
 

@@ -21,11 +21,9 @@
 
         </div>
 
-
-
-        <SwipeView :room="room" :ready="ready" v-if="ready && userStep == 1" />
-        <VoteView :room="room" :ready="ready" v-if="ready && userStep == 2" />
-        <ResultsView :room="room" :ready="ready" v-if="ready && userStep == 3" />
+        <SwipeView :room="room" :ready="ready" :movies="movies" v-if="ready && userStep == 1" />
+        <VoteView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="ready && userStep == 2" />
+        <ResultsView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="ready && userStep == 3" />
 
         <ModaleInfoMain :page="userStep" />
 
@@ -34,7 +32,7 @@
 </template>
 
 <script>
-import { get, apiURL, post } from '@/api/services';
+import { get, apiURL, post, getMovie } from '@/api/services';
 import { io } from "socket.io-client";
 
 import SwipeView from '@/views/SwipeView.vue';
@@ -56,7 +54,10 @@ export default {
             ready: false,
             userStep: 0,
 
-            userBucket: []
+            userBucket: [],
+
+            movies: [], //La liste de tous les films de la room, chargés une fois pour améliorer les performances
+            moviesBucketRoom: [] //La liste des films du bucket de la room 
         }
     },
 
@@ -69,8 +70,9 @@ export default {
     },
 
     async created() {
-        socket.on(`updateRoom:${this.$route.params.roomCode}`, () => {
-            this.updateRoom();
+        socket.on(`updateRoom:${this.$route.params.roomCode}`, async () => {
+            await this.updateRoom();
+            this.setBucketRoom();
         });
     },
 
@@ -84,10 +86,28 @@ export default {
             this.$router.push({ name: 'home' });
         }
 
+        await this.getFilms();
+
+        this.setBucketRoom();
+
         this.ready = true;
     },
 
     methods: {
+        setBucketRoom() {
+            this.moviesBucketRoom = [];
+            for(let i = 0; i < this.room.data.bucket.length; i++) {
+                let film = this.movies.find(movie => movie.id == this.room.data.bucket[i].idFilm);
+                film.weight = this.room.data.bucket[i].weight;
+                this.moviesBucketRoom.push(film);
+            }
+        },
+        async getFilms() {
+            this.movies = await Promise.all(this.room.data.films.map(async film => {
+                let f = await getMovie(film);
+                return f.data;
+            }));
+        },
         async updateRoom() {
             this.room = await this.getRoom();
 

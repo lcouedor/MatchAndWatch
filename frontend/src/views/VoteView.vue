@@ -1,44 +1,45 @@
 <template>
-    <div v-if="room.data.minStep !=2">
-        En attente des autres joueurs
-    </div>
+    <div v-if="ready">
+        <div v-if="room.data.minStep != 2">
+            En attente des autres joueurs
+        </div>
 
-    <div v-else class="listFilmsToRate">
-        <div v-for="film in films" :id="`cardFilm${film.id}`" class="cardFilmContainer">
-            <div class="titre">{{ film.title }}</div>
-            <div class="cardImg">
-                <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
-                <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film" class="blurImg">
-                <div class="overviewCardZone">
-                    {{ film.overview }}
+        <div v-else class="listFilmsToRate">
+            <div v-for="film in movies" :id="`cardFilm${film.id}`" class="cardFilmContainer">
+                <div class="titre">{{ film.title }}</div>
+                <div class="cardImg">
+                    <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
+                    <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film"
+                        class="blurImg">
+                    <div class="overviewCardZone">
+                        {{ film.overview }}
+                    </div>
+                </div>
+                <div class="ratingBoxes">
+                    <div class="nono" @click="setNote(film.id, 'nono')">✓</div>
+                    <div class="no" @click="setNote(film.id, 'no')">✓</div>
+                    <div class="neutral" @click="setNote(film.id, 'neutral')">✓</div>
+                    <div class="ok" @click="setNote(film.id, 'ok')">✓</div>
+                    <div class="okok" @click="setNote(film.id, 'okok')">✓</div>
                 </div>
             </div>
-            <div class="ratingBoxes">
-                <div class="nono" @click="setNote(film.id,'nono')">✓</div>
-                <div class="no" @click="setNote(film.id,'no')">✓</div>
-                <div class="neutral" @click="setNote(film.id,'neutral')">✓</div>
-                <div class="ok" @click="setNote(film.id,'ok')">✓</div>
-                <div class="okok" @click="setNote(film.id,'okok')">✓</div>
-            </div>
-        </div>
 
-        <div class="buttonsContainer">
-            <button class="normalButton" @click="verifyRatings">Voter</button>
+            <div class="buttonsContainer">
+                <button class="normalButton" @click="verifyRatings">Voter</button>
+            </div>
+
         </div>
-        
     </div>
-    
+
 </template>
 
 <script>
-import { getMovie } from '@/api/services';
 
 export default {
     name: 'VoteView',
 
     data() {
         return {
-            films: []
         }
     },
 
@@ -47,10 +48,14 @@ export default {
             type: Object,
             default: null
         },
+        movies: {
+            type: Array,
+            default: []
+        },
         ready: {
             type: Boolean,
             default: false
-        }
+        },
     },
 
     watch: {
@@ -58,25 +63,14 @@ export default {
             immediate: true,
             handler() {
                 if (this.ready) {
-                    this.getFilms();
+                    //On affiche tous les id des films
+                    // console.log(this.movies.map(film => film.id));
                 }
             }
         },
-        room: {
-            immediate: true,
-            handler() {
-                this.getFilms();
-            }
-        }
     },
 
     methods: {
-        async getFilms() {
-            this.films = await Promise.all(this.room.data.bucket.map(async film => {
-                let f = await getMovie(film.idFilm);
-                return f.data;
-            }));
-        },
 
         setNote(filmId, note) {
             //Je retire la classe boxSelected de tous les enfants de la div parent
@@ -88,7 +82,7 @@ export default {
             //J'ajoute la classe boxSelected à l'élément cliqué
             event.target.classList.add('boxSelected');
 
-            let film = this.films.find(film => film.id == filmId);
+            let film = this.movies.find(film => film.id == filmId);
 
             switch (note) {
                 case 'nono':
@@ -116,10 +110,10 @@ export default {
             }
         },
 
-        verifyRatings(){
+        verifyRatings() {
             //TODO vérifier que tous les films ont une note
-            for(let film of this.films){
-                if(film.note === undefined){
+            for (let film of this.movies) {
+                if (film.note === undefined) {
                     //Je scroll jusqu'au film sans note
                     let filmElement = document.getElementById(`cardFilm${film.id}`);
                     filmElement.scrollIntoView({ behavior: 'smooth' });
@@ -127,7 +121,7 @@ export default {
                 }
             }
 
-            this.$parent.validStep2(this.films);
+            this.$parent.validStep2(this.movies);
         }
     },
 

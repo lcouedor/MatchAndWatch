@@ -60,6 +60,7 @@ export async function get(path: string, data: any): Promise<any> {
   }
 }
 
+//TODO utiliser le get normal
 export async function getMovie(movieId: number) {
   try{
     let data = { params: { movieId: movieId } };
