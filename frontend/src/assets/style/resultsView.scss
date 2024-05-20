@@ -1,8 +1,6 @@
 @use 'variables' as *;
 
 .resultList{
-    height: 90dvh;
-    overflow: auto;
     display: flex;
     flex-direction: column;
 
@@ -32,26 +30,19 @@
 
     .dataFilm{
         display: flex;
-        flex-direction: row;
+        color: $textColorPrimary;
+        font-size: $textFontSizes;
 
-        .left{
-            width: 70%;
+        .genresList{
+            background-color: $primaryColor;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            margin: 1vh;
 
             p{
-                text-align: justify;
-                padding: 2vh;
-                height: 40dvh;
-                overflow-y: auto;
-            }
-        }
-
-        .right{
-            width: 30%;
-
-            .note{
-                display: table-cell;
-                text-align: center;
-                margin-bottom: 2vh;
+                padding: 1vh;
             }
         }
     }

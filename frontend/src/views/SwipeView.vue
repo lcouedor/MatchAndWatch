@@ -1,7 +1,7 @@
 <template>
     <div v-if="!ready" class="loadingView">
         <div class="loadingData">
-            <p>Patience, on charge les données !</p>
+            <p>On y est presque !</p>
             <div class="waiting waitingVisible">
                 <div class="spin"></div>
             </div>
@@ -90,6 +90,8 @@ export default {
                     // Une fois que les films sont chargés, on les copie dans films
                     this.films = this.movies;
                     this.displayFilms = [...this.films];
+                    //On shuffle les films à afficher
+                    this.displayFilms = this.displayFilms.sort((a, b) => 0.5 - Math.random());
                     this.currentFilm = this.displayFilms.pop();
                 }
             }

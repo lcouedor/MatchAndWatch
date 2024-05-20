@@ -1,9 +1,9 @@
 <template>
     <div class="bodyApp">
         <div class="headerMain">
-            <div class="copyZone normalButton" @click="copyToClipboard">
+            <div class="copyZone normalButton">
                 {{ $route.params.roomCode }}
-                <div class="symbols">
+                <div class="symbols" @click="copyToClipboard">
                     <span class="copySymbol symbolVisible">
                         <img src="../assets/images/copy.png" alt="">
                     </span>
@@ -11,7 +11,6 @@
                         <img src="../assets/images/check.png" alt="">
                     </span>
                 </div>
-
             </div>
 
             <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
@@ -43,7 +42,6 @@ import VoteView from '@/views/VoteView.vue';
 import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
 import ModaleInfoMain from '@/modales/ModaleInfoMain.vue';
-import { watch } from "vue";
 
 const socket = io(apiURL);
 
@@ -86,10 +84,10 @@ export default {
     async mounted() {
         console.log(this.$route.params.roomCode);
         await this.updateRoom();
-
         await this.getFilms();
-
         this.setBucketRoom();
+
+        console.log("route:",this.$route)
 
         this.ready = true;
     },

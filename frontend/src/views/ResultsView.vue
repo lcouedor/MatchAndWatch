@@ -1,11 +1,20 @@
 <template>
-    <div v-if="ready" class="stepPage">
-
-        <div v-if="room.data.minStep != 3">
-            En attente des autres joueurs
+    <div v-if="room.data.minStep != 3" class="loadingView">
+        <p>En attente des autres participants</p>
+        <div class="watchersList">
+            <div v-for="watcher in watcherList" :key="watcher.id" class="watcherInWait"
+                :class="watcher.step == 2 ? 'waitingWatcher' : ''">
+                {{ watcher.name }}
+                <div class="waiting waitingVisible">
+                    <div class="spin"></div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div v-else class="resultList" v-if="winner">
+    <div v-else class="stepPage">
+
+        <div class="resultList" v-if="winner">
             <div class="titre">{{ winner.title }} ({{ getYear(winner.release_date) }})</div>
             <p class="titre">{{ }}</p>
             <div class="imgContainer">
@@ -14,16 +23,12 @@
             </div>
 
             <div class="dataFilm">
-                <div class="left">
-                    <p>{{ winner.overview }}</p>
-                </div>
-
-                <div class="right">
-                    <p class="note">{{ Math.round(winner.vote_average * 10) / 10 }}/10 ({{ winner.vote_count }} votants)
-                    </p>
+                <p class="note">{{ Math.round(winner.vote_average * 10) / 10 }}/10 ({{ winner.vote_count }} votants imdb)</p>
+                <div class="genresList">
                     <p v-for="genre in winner.genres" :key="genre.id">{{ genre.name }}</p>
-
                 </div>
+
+                <div class="overviewZone">{{ winner.overview }}</div>
             </div>
 
         </div>
@@ -41,6 +46,7 @@ export default {
         return {
             films: [],
             winner: null,
+            watcherId: sessionStorage.getItem('watcherId'),
         }
     },
 
@@ -73,6 +79,14 @@ export default {
                 }
             }
         },
+    },
+
+    computed: {
+        watcherList() {
+            console.log
+            //on retourne les watchers de la room moins soi-même
+            return this.room.data.watchers.filter(watcher => watcher.id != this.watcherId);
+        }
     },
 
     methods: {
