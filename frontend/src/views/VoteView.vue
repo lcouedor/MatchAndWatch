@@ -1,10 +1,20 @@
 <template>
-    <div v-if="ready" class="stepPage">
-        <div v-if="room.data.minStep != 2">
-            En attente des autres joueurs
+    <div v-if="room.data.minStep != 2" class="loadingView">
+        <p>En attente des autres participants</p>
+        <div class="watchersList">
+            <div v-for="watcher in watcherList" :key="watcher.id" class="watcherInWait"
+                :class="watcher.step == 1 ? 'waitingWatcher' : ''">
+                {{ watcher.name }}
+                <div class="waiting waitingVisible">
+                    <div class="spin"></div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div v-else id="listFilmsToRate" class="listFilmsToRate">
+    <div v-else class="stepPage">
+
+        <div id="listFilmsToRate" class="listFilmsToRate">
             <div v-for="film in movies" :id="`cardFilm${film.id}`" class="cardFilmContainer">
                 <div class="titre">{{ film.title }}</div>
                 <div class="cardImg">
@@ -41,6 +51,7 @@ export default {
 
     data() {
         return {
+            watcherId: sessionStorage.getItem('watcherId'),
         }
     },
 
@@ -59,16 +70,11 @@ export default {
         },
     },
 
-    watch: {
-        ready: {
-            immediate: true,
-            handler() {
-                if (this.ready) {
-                    //On affiche tous les id des films
-                    // console.log(this.movies.map(film => film.id));
-                }
-            }
-        },
+    computed: {
+        watcherList() {
+            //on retourne les watchers de la room moins soi-même
+            return this.room.data.watchers.filter(watcher => watcher.id != this.watcherId);
+        }
     },
 
     methods: {

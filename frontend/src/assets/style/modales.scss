@@ -1,18 +1,21 @@
 @use 'variables' as *;
 
 .modal{
-    display: none;
     //définir la hauteur à la taille max disponible
     //Y compris sur mobile en prenant en compte la barre de navigation
     height: 100dvh;
     width: 100vw;
-    position: absolute;
-    top: 0;
+    position: fixed;
+    top: -100%;
     left: 0;
     flex-direction: column;
 
     //Un gris foncé transparent
     background-color: rgba(0, 0, 0, 0.9);
+
+    transition: all 0.3s;
+    overflow: hidden;
+    overflow-y: auto;
 
     .modalBody, .dismissModal{
         z-index: 101;
@@ -43,5 +46,6 @@
 }
 
 .showModal{
-    display: flex;
+    top: 0;
+    transition: all 0.3s;
 }

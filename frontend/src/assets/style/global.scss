@@ -205,8 +205,78 @@ select, input{
     
 }
 
-.stepPage{
+.stepPage, .loadingView{
     margin-top: 10dvh;
     height: 90dvh;
-    overflow-x: auto;
+    width: 100vw;
+    overflow: hidden;
+    overflow-y: auto;
 }
+
+.loadingView{
+    display: flex;
+    flex-direction: column;
+    color: $textColorPrimary;
+
+    .loadingData{
+        margin-top: auto;
+        margin-bottom: auto;
+        width: 100vw;
+        display: table-cell;
+        text-align: center;
+        color: $textColorPrimary;
+        flex-direction: column;
+        font-size: $titreFontSizes;
+
+        .waiting{
+            padding: 5vh;
+            display: flex;
+            justify-content: center;
+
+            .spin{
+                width: 10vh;
+                height: 10vh;
+            }
+        }
+    }
+
+    p{
+        padding: 2vh;
+        display: table-cell;
+        text-align: center;
+
+        margin-top: auto;
+    }
+}
+
+.watchersList{
+    padding: 2vh;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    
+    margin-bottom: auto;
+
+
+    .watcherInWait{
+        margin: 1vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 35vw;
+        border-radius: $stdRadius;
+        padding: 2vh;
+        font-size: $textFontSizes;
+        color: white;
+        background-color: $primaryColor;
+
+        &>.waitingVisible{
+            display: none;
+        }
+    }
+    .waitingWatcher .waitingVisible{
+        display: flex;
+    }
+}
+

@@ -4,7 +4,7 @@
 
 	<div class="buttonsHome">
 		<CustomBtn text="Créer une Room" @click="showModal('modaleCreateRoom')" />
-		<CustomBtn text="Rejoindre une Room" @click="showModal('modaleJoinRoom')" />
+		<CustomBtn text="Rejoindre une Room" @click="showModal('modaleJoinRoom')" id="createRoom"/>
 	</div>
 
 	<div class="info" @click="showModal('modaleInfo')">i</div>
@@ -22,7 +22,6 @@ import ModaleCreateRoom from '@/modales/ModaleCreateRoom.vue';
 import ModaleJoinRoom from '@/modales/ModaleJoinRoom.vue';
 
 export default {
-
 	name: "HomeView",
 	components: {
 		CustomBtn,
@@ -30,8 +29,12 @@ export default {
 		ModaleCreateRoom,
 		ModaleJoinRoom,
 	},
-	methods: {
+	
+	props:{
+		create: Boolean
+	},
 
+	methods: {
 		showModal(modal) {
 			document.getElementById(modal).classList.add("showModal");
 		},

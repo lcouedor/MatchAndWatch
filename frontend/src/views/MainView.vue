@@ -23,9 +23,9 @@
 
         </div>
 
-        <SwipeView :room="room" :ready="ready" :movies="movies" v-if="ready && userStep == 1" />
-        <VoteView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="ready && userStep == 2" />
-        <ResultsView :room="room" :ready="ready" :movies="moviesBucketRoom" :updated="updated" v-if="ready && userStep == 3" />
+        <SwipeView :room="room" :ready="ready" :movies="movies" v-if="userStep == 1" />
+        <VoteView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="userStep == 2" />
+        <ResultsView :room="room" :ready="ready" :movies="moviesBucketRoom" :updated="updated" v-if="userStep == 3" />
 
         <ModaleInfoMain :page="userStep" />
 
@@ -43,6 +43,7 @@ import VoteView from '@/views/VoteView.vue';
 import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
 import ModaleInfoMain from '@/modales/ModaleInfoMain.vue';
+import { watch } from "vue";
 
 const socket = io(apiURL);
 
@@ -86,12 +87,6 @@ export default {
         console.log(this.$route.params.roomCode);
         await this.updateRoom();
 
-        //On vérifie que le watcher est bien dans la room, sinon on le redirige
-        let watcherId = sessionStorage.getItem('watcherId');
-        if (!this.room.data.watchers.find(watcher => watcher.id == watcherId)) {
-            this.$router.push({ name: 'home' });
-        }
-
         await this.getFilms();
 
         this.setBucketRoom();
@@ -117,7 +112,13 @@ export default {
         async updateRoom() {
             this.room = await this.getRoom();
 
+            //On vérifie que le watcher est bien dans la room, sinon on le redirige
             let watcherId = sessionStorage.getItem('watcherId');
+            if(!watcherId || !this.room.data.watchers.find(watcher => watcher.id == watcherId)){
+                this.$router.push({ name: 'home', query:{ code: this.$route.params.roomCode } });           
+                return;
+            }
+
             this.userStep = this.room.data.watchers.find(watcher => watcher.id == watcherId).step;
         },
         async getRoom() {

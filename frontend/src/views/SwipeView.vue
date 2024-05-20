@@ -1,5 +1,15 @@
 <template>
-    <div v-if="ready" class="stepPage">
+    <div v-if="!ready" class="loadingView">
+        <div class="loadingData">
+            <p>Patience, on charge les données !</p>
+            <div class="waiting waitingVisible">
+                <div class="spin"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div v-else class="stepPage">
         <div class="bandeauSwipe">
             {{ $parent.userBucket.length }}/{{ room.data.bucket_size }} films likés
         </div>
@@ -52,6 +62,8 @@ export default {
             initialLeft: 0,
 
             card: null,
+            actualLeft: null,
+            actualRight: null,
         }
     },
 
@@ -91,6 +103,8 @@ export default {
 
             //On récupère l'élement à déplacer horizontalement
             this.card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
+            this.actualLeft = this.card.querySelector("#leftZone")
+            this.actualRight = this.card.querySelector("#rightZone")
             this.initialLeft = this.card.getBoundingClientRect().left;
         },
         onDragMove(e) {
@@ -104,12 +118,6 @@ export default {
 
             //On calcule la distance parcourue par la souris depuis le début du drag
             let diff = currentX - this.initialX;
-
-            //On déplace l'élement horizontalement
-            // this.card.style.left = `${this.initialLeft + diff}px`;
-
-            // //On supprime le translateX
-            // this.card.style.transform = 'translateX(0)';
 
             //On déplace l'élement horizontalement avec un translateX
             this.card.style.transform = `translateX(calc(-50% + ${diff}px))`;
@@ -125,8 +133,8 @@ export default {
 
                 //On rend visible la zone de gauche
                 let opacity = (window.innerWidth / 4 - cardCenter) / (window.innerWidth / 4) * 0.5;
-                document.getElementById('leftZone').getElementsByClassName("background")[0].style.opacity = opacity;
-                document.getElementById('leftZone').style.opacity = 1;
+                this.actualLeft.getElementsByClassName("background")[0].style.opacity = opacity;
+                this.actualLeft.style.opacity = 1;
             } else if (cardCenter > window.innerWidth * 3 / 4) {
                 //On ajoute une rotation à l'image
                 let rotation = (cardCenter - window.innerWidth * 3 / 4) / (window.innerWidth / 4) * 30;
@@ -134,14 +142,12 @@ export default {
 
                 //On rend visible la zone de droite (opacité qui dépend de la position de la souris) de 0 à 0.5
                 let opacity = (cardCenter - window.innerWidth * 3 / 4) / (window.innerWidth / 4) * 0.5;
-                document.getElementById('rightZone').getElementsByClassName("background")[0].style.opacity = opacity;
-                document.getElementById('rightZone').style.opacity = 1;
+                this.actualRight.getElementsByClassName("background")[0].style.opacity = opacity;
+                this.actualRight.style.opacity = 1;
             } else {
-                document.getElementById('rightZone').style.opacity = 0;
-                document.getElementById('leftZone').style.opacity = 0;
+                this.actualRight.style.opacity = 0;
+                this.actualLeft.style.opacity = 0;
             }
-
-
         },
         onDragEnd() {
             let transitionDuration = 500;
@@ -169,8 +175,8 @@ export default {
                     card.style.transition = 'none';
 
                     //On rend invisible les zones
-                    document.getElementById('leftZone').style.opacity = 0;
-                    document.getElementById('rightZone').style.opacity = 0;
+                    this.actualLeft.style.opacity = 0;
+                    this.actualRight.style.opacity = 0;
                 }, transitionDuration);
             } else if (cardCenter > window.innerWidth * 3 / 4) {
                 card.style.left = '150%';
@@ -200,8 +206,8 @@ export default {
                     card.style.transition = 'none';
 
                     //On rend invisible les zones
-                    document.getElementById('leftZone').style.opacity = 0;
-                    document.getElementById('rightZone').style.opacity = 0;
+                    this.actualLeft.style.opacity = 0;
+                    this.actualRight.style.opacity = 0;
                 }, transitionDuration);
 
             } else {

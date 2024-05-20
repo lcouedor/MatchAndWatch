@@ -24,7 +24,7 @@
 
             <div class="inputBloc">
                 <label>Comment t'appelles-tu Padawan ?</label>
-                <input ref="inputNomCreateRoom" @input="uppercaseChar('inputNomCreateRoom')">
+                <input ref="inputNomCreateRoom" @input="uppercaseChar('inputNomCreateRoom')" maxlength="16">
                 <p class="errorMessage">{{ errors.name }}</p>
             </div>
 
@@ -54,7 +54,7 @@ export default {
 
     data() {
         return {
-            roomSizeOptions: [1, 2, 3, 4, 5],
+            roomSizeOptions: [2, 3, 4, 5, 6, 7, 8, 9, 10],
             bucketSizeOptions: [5, 10, 15, 20],
 
             errors: {

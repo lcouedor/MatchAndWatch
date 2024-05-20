@@ -1,5 +1,5 @@
 <template>
-    <div id="modaleJoinRoom" class="modal">
+    <div id="modaleJoinRoom" class="modal" ref="modalJoinRoom">
         <div class="dismissModal">
             <div class="dismissButton" @click="dismissModal">✗</div>
         </div>
@@ -47,6 +47,13 @@ export default {
             }
         }
     },
+
+    mounted(){
+		if(this.$route.query.code){
+            this.$refs.modalJoinRoom.classList.add("showModal")
+			this.$refs.inputRoomCode.value = this.$route.query.code
+		}
+	},
 
     methods: {
         dismissModal() {
