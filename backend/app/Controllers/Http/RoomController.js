@@ -37,7 +37,6 @@ class RoomController {
 			//TODO mettre les variables dans un fichier dédié, comme ici pour la taille max du bucket et de la room
 			let nbMovies = Math.min(bucket_size, 10) * Math.min(room_size * 2, 5)
 			const films = await tmdbService.getRandomMovies(nbMovies)
-			console.log('Movies:', films)
 
 			//On ajoute des lignes dans la table films_rooms pour chaque film
 			for (let film of films) {
@@ -214,7 +213,6 @@ class RoomController {
 			}
 
 			//On supprime le watcher de la base de données
-			//Le watcher se trouve avec id et non watcher_id
 			await watcher.delete()
 
 			return response.status(200).json({ success: true, message: 'Watcher with id ' + watcher_id + ' left room with code ' + code })

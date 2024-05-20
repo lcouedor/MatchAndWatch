@@ -36,7 +36,7 @@
         color: $textColorPrimary;
 
         h2{
-            color: $secondaryColor;
+            color: $primaryColor;
             margin-top: 5vh;
         }
     }
@@ -44,15 +44,4 @@
 
 .showModal{
     display: flex;
-
-    // .backdrop{
-    //     position: absolute;
-    //     top: 0;
-    //     left: 0;
-    //     width: 100vw;
-    //     height: 100vh;
-    //     //TODO
-    //     // background-color: red;
-    //     z-index: 100;
-    // }
 }

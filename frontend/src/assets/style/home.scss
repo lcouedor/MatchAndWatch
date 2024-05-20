@@ -1,0 +1,30 @@
+@use 'variables' as *;
+
+h1{
+    width: 100vw;
+    height: 10vh;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+
+    padding: 2vh;
+
+    color: $textColorPrimary;
+    font-size: 2em;
+
+    text-transform: uppercase;
+
+    transition: all 0.3s;
+}
+
+.buttonsHome, .buttonsModal{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 20vh;
+}
+
+.buttonsModal{
+    margin-top: 2vh;
+}

@@ -1,6 +1,8 @@
 <template>
   <div id="mainApp">
     <router-view />
+
+    <div id="snackbar"></div>
   </div>
 </template>
 

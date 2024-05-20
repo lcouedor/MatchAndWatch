@@ -1,10 +1,10 @@
 <template>
-    <div v-if="ready">
+    <div v-if="ready" class="stepPage">
         <div v-if="room.data.minStep != 2">
             En attente des autres joueurs
         </div>
 
-        <div v-else class="listFilmsToRate">
+        <div v-else id="listFilmsToRate" class="listFilmsToRate">
             <div v-for="film in movies" :id="`cardFilm${film.id}`" class="cardFilmContainer">
                 <div class="titre">{{ film.title }}</div>
                 <div class="cardImg">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+import * as utils from '@/assets/script/utils';
 
 export default {
     name: 'VoteView',
@@ -102,21 +103,12 @@ export default {
                     break;
             }
             film.note = note;
-
-            //Je scroll jusqu'au prochain film
-            let nextFilm = document.getElementById(`cardFilm${filmId}`).nextElementSibling;
-            if (nextFilm) {
-                nextFilm.scrollIntoView({ behavior: 'smooth' });
-            }
         },
 
         verifyRatings() {
-            //TODO vérifier que tous les films ont une note
             for (let film of this.movies) {
                 if (film.note === undefined) {
-                    //Je scroll jusqu'au film sans note
-                    let filmElement = document.getElementById(`cardFilm${film.id}`);
-                    filmElement.scrollIntoView({ behavior: 'smooth' });
+                    utils.showSnackbar('Veuillez voter pour tous les films', 2000)
                     return;
                 }
             }

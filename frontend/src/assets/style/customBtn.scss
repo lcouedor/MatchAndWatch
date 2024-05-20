@@ -13,17 +13,6 @@
     cursor: pointer;
     color: $textColorPrimary;
 
-    //une ombre en dessous
-    box-shadow: 0px 3px $accentColor;
-
-    transition: all 0.2s;
-
-    &:hover{
-        //On ajoute une 2e ombre pour donner un effet de flottaison
-        box-shadow: 0px 6px $accentColor, 0px 12px $secondaryColor;
-        
-
-        transition: all 0.2s;
-    }
-
+    //deux ombres en dessous
+    box-shadow: 0 3px 0 $secondaryColor, 0 6px 0 $accentColor;
 }

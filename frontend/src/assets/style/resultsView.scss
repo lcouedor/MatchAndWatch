@@ -1,7 +1,7 @@
 @use 'variables' as *;
 
 .resultList{
-    height: 90vh;
+    height: 90dvh;
     overflow: auto;
     display: flex;
     flex-direction: column;
@@ -10,12 +10,12 @@
         margin-top: 3vh;
         margin-bottom: 3vh;
         position: relative;
-        height: 40vh;
+        height: 40dvh;
         width: 100vw;
 
         img{
             position: absolute;
-            height: 40vh;
+            height: 40dvh;
 
             &:nth-child(1){
                 filter: blur(20px);
@@ -40,7 +40,7 @@
             p{
                 text-align: justify;
                 padding: 2vh;
-                height: 40vh;
+                height: 40dvh;
                 overflow-y: auto;
             }
         }

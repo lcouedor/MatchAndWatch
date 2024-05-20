@@ -1,5 +1,5 @@
 <template>
-    <div v-if="ready">
+    <div v-if="ready" class="stepPage">
 
         <div v-if="room.data.minStep != 3">
             En attente des autres joueurs
@@ -57,39 +57,41 @@ export default {
             type: Boolean,
             default: false
         },
+        updated: {
+            type: Boolean,
+            default: false
+        }
     },
 
     watch: {
-        ready: {
+        updated: {
             immediate: true,
             async handler() {
-                if (this.ready) {
-                    // Je détermine le gagnant
-                    // Si il y a égalité, je prends le plus voté
-                    this.winner = this.movies.reduce((acc, film) => {
-                        if (!acc) {
-                            return film;
-                        }
-
-                        if (film.weight > acc.weight) {
-                            return film;
-                        }
-
-                        if (film.weight === acc.weight) {
-                            if (film.vote_count > acc.vote_count) {
-                                return film;
-                            }
-                        }
-
-                        return acc;
-                    }, null);
-
+                if (this.room.data.minStep == 3) {
+                    //calcul du gagnant
+                    this.winner = this.calcWinner();
                 }
             }
         },
     },
 
     methods: {
+
+        calcWinner() {
+            // Je détermine le gagnant en fonction du weight de chaque film
+            // Si il y a égalité, je prends le plus voté
+            let winner = this.movies[0];
+            for (let i = 1; i < this.movies.length; i++) {
+                if (this.movies[i].weight > winner.weight) {
+                    winner = this.movies[i];
+                } else if (this.movies[i].weight == winner.weight) {
+                    if (this.movies[i].vote_count > winner.vote_count) {
+                        winner = this.movies[i];
+                    }
+                }
+            }
+            return winner;
+        },
 
         getYear(date) {
             return new Date(date).getFullYear();

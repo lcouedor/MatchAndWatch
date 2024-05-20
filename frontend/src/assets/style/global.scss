@@ -19,47 +19,7 @@ body{
     width: 100vw;
     overflow: hidden;
 
-    background: rgb(122,48,108);
-    background: linear-gradient(180deg, rgba(122,48,108,1) 0%, rgba(254,201,241,1) 100%);
-
-}
-
-h1{
-    width: 100vw;
-    height: 10vh;
-    display: table-cell;
-    text-align: center;
-    vertical-align: middle;
-
-    padding: 2vh;
-
-    color: $textColorPrimary;
-    font-size: 2em;
-
-    text-transform: uppercase;
-
-    //mettre le titre en valeur
-    text-shadow: 3px 3px $textColorSecondary;
-
-    transition: all 0.3s;
-
-    &:hover{
-        text-shadow: 5px 5px $textColorSecondary;
-
-        transition: all 0.3s;
-    }
-}
-
-.buttonsHome, .buttonsModal{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    margin-top: 20vh;
-}
-
-.buttonsModal{
-    margin-top: 2vh;
+    background: $backgroundColor;
 }
 
 .info{
@@ -72,11 +32,6 @@ h1{
     height: 5vh;
     font-size: $titreFontSizes;
     border: 2px solid $textColorPrimary;
-
-    &:hover{
-        background-color: $accentColor;
-        color: $textColorSecondary;
-    }
 
     margin-left: auto;
     margin-right: auto;
@@ -103,7 +58,7 @@ select, input{
     border-radius: $stdRadius;
     padding: 2vh;
     font-size: $textFontSizes;
-    border: 2px solid $borderColor;
+    border: 2px solid $primaryColor;
 }
 
 .errorInput{
@@ -149,44 +104,64 @@ select, input{
 .bodyApp{
     position: relative;
     height: 100dvh;
-    // overflow-y: auto;
-    // overflow-x: hidden;
 }
 
 .normalButton{
-    background-color: $accentColor;
-    color: $textColorSecondary;
-    border: 2px solid $borderColor;
+    background-color: $primaryColor;
+    color: $textColorPrimary;
+    border: 1px solid $tertiaryColor;
     border-radius: $stdRadius;
     padding: 1vh;
-    font-size: .8em;
+    font-size: $textFontSizes;
+    min-width: 25vw;
+    margin-left: 1vh;
+    margin-right: 1vh;
 }
 
+#snackbar{
+    position: absolute;
+    bottom: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw;
+    background-color: $primaryColor;
+    border-radius: $stdRadius;
+    padding: 1vh;
+    pointer-events: none;
+    font-size: $textFontSizes;
+    display: table-cell;
+    text-align: center;
+    z-index: 2000;
+
+    transition: all 0.3s;
+}
+
+.snackbarVisible{
+    pointer-events: auto;
+    bottom: 2% !important;
+
+    transition: all 0.3s;
+}
+
+//la zone Main (donc une fois dans la room)
+//---------------------
+//---------------------
+//---------------------
 .headerMain{
-    height: 10vh;
+    height: 10dvh;
+    width: 100vw;
     display: flex;
     align-items: center;
+    position: fixed;
+    top: 0;
     padding: 2vh;
-    justify-content: space-around;
-
-    .leftRoom{
-        border-radius: $stdRadius;
-        font-size: $textFontSizes;
-        border: 2px solid $borderColor;
-        background-color: $accentColor;
-    }
 
     .copyZone{
-        height: 100%;
         display: flex;
         align-items: center;
-        justify-content: space-around;
-        font-size: $sousTitreFontSizes;
-        color: $textColorSecondary;
-        border-radius: $stdRadius;
-        border: 2px dashed $borderColor;
+        justify-content: space-evenly;
+        font-size: $textFontSizes;
 
-        background-color: $accentColor;
         position: relative;
 
         .symbols{
@@ -213,15 +188,25 @@ select, input{
             transform: rotateY(0deg);
             transition: all 0.3s;
         }
-    }
 
-    .copyZone, .leftRoom{
-        height: 100%;
-        width: 35%;
+        .copySymbol, .validCopySymbol{
+            height: 100%;
+        }
     }
 
     .info{
-        margin: 0;
-    }    
+        margin-top: 0;
+        margin-left: auto;
+    }  
     
+    .copyZone, .leftRoom{
+        height: 100%;
+    }
+    
+}
+
+.stepPage{
+    margin-top: 10dvh;
+    height: 90dvh;
+    overflow-x: auto;
 }

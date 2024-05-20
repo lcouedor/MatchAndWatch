@@ -1,11 +1,11 @@
 <template>
-    <div v-if="ready">
+    <div v-if="ready" class="stepPage">
         <div class="bandeauSwipe">
             {{ $parent.userBucket.length }}/{{ room.data.bucket_size }} films likés
         </div>
 
         <div class="titre" v-if="currentFilm">
-            <p>{{ currentFilm.title }}</p>
+            <p>{{ currentFilm.title }} ({{ new Date(currentFilm.release_date).getFullYear() }})</p>
         </div>
 
         <div class="containerFilms">
@@ -50,6 +50,8 @@ export default {
 
             initialX: 0,
             initialLeft: 0,
+
+            card: null,
         }
     },
 
@@ -88,17 +90,14 @@ export default {
             this.initialX = e.touches[0].clientX;
 
             //On récupère l'élement à déplacer horizontalement
-            let card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
-            this.initialLeft = card.getBoundingClientRect().left;
+            this.card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
+            this.initialLeft = this.card.getBoundingClientRect().left;
         },
         onDragMove(e) {
-            //On récupère l'élement à déplacer horizontalement
-            let card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
-
             //On récupère la position actuelle de la souris
             let currentX = e.touches[0].clientX;
 
-            //Si je suis en dehors de la fenêtre, je ne fais rien
+            //Si la moitié de l'image est hors de l'écran, on ne fait rien
             if (currentX < 0 || currentX > window.innerWidth) {
                 return;
             }
@@ -107,19 +106,22 @@ export default {
             let diff = currentX - this.initialX;
 
             //On déplace l'élement horizontalement
-            card.style.left = `${this.initialLeft + diff}px`;
+            // this.card.style.left = `${this.initialLeft + diff}px`;
 
-            //On supprime le translateX
-            card.style.transform = 'translateX(0)';
+            // //On supprime le translateX
+            // this.card.style.transform = 'translateX(0)';
+
+            //On déplace l'élement horizontalement avec un translateX
+            this.card.style.transform = `translateX(calc(-50% + ${diff}px))`;
 
             //On regarde la position du centre de l'image
-            let cardCenter = card.getBoundingClientRect().left + card.getBoundingClientRect().width / 2;
+            let cardCenter = this.card.getBoundingClientRect().left + this.card.getBoundingClientRect().width / 2;
 
             //On regarde si l'image est dans le quart gauche, le quart droit ou le milieu
             if (cardCenter < window.innerWidth / 4) {
                 //On ajoute une rotation à l'image
                 let rotation = (cardCenter - window.innerWidth / 4) / (window.innerWidth / 4) * 30;
-                card.style.transform = `rotate(${rotation}deg)`;
+                this.card.style.transform = `translateX(calc(-50% + ${diff}px)) rotate(${rotation}deg)`;
 
                 //On rend visible la zone de gauche
                 let opacity = (window.innerWidth / 4 - cardCenter) / (window.innerWidth / 4) * 0.5;
@@ -128,7 +130,7 @@ export default {
             } else if (cardCenter > window.innerWidth * 3 / 4) {
                 //On ajoute une rotation à l'image
                 let rotation = (cardCenter - window.innerWidth * 3 / 4) / (window.innerWidth / 4) * 30;
-                card.style.transform = `rotate(${rotation}deg)`;
+                this.card.style.transform = `translateX(calc(-50% + ${diff}px)) rotate(${rotation}deg)`;
 
                 //On rend visible la zone de droite (opacité qui dépend de la position de la souris) de 0 à 0.5
                 let opacity = (cardCenter - window.innerWidth * 3 / 4) / (window.innerWidth / 4) * 0.5;

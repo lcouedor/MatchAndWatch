@@ -1,7 +1,7 @@
 <template>
     <div class="bodyApp">
         <div class="headerMain">
-            <div class="copyZone" @click="copyToClipboard">
+            <div class="copyZone normalButton" @click="copyToClipboard">
                 {{ $route.params.roomCode }}
                 <div class="symbols">
                     <span class="copySymbol symbolVisible">
@@ -14,16 +14,18 @@
 
             </div>
 
+            <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
+
             <span class="info" @click="displayInfo" v-if="userStep == 1 || userStep == 2">i</span>
 
-            <button class="leftRoom" @click="leftRoom">Quitter la room</button>
+            
 
 
         </div>
 
         <SwipeView :room="room" :ready="ready" :movies="movies" v-if="ready && userStep == 1" />
         <VoteView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="ready && userStep == 2" />
-        <ResultsView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="ready && userStep == 3" />
+        <ResultsView :room="room" :ready="ready" :movies="moviesBucketRoom" :updated="updated" v-if="ready && userStep == 3" />
 
         <ModaleInfoMain :page="userStep" />
 
@@ -32,16 +34,15 @@
 </template>
 
 <script>
-import { get, apiURL, post, getMovie } from '@/api/services';
 import { io } from "socket.io-client";
+import { get, apiURL, post, getMovie, del } from '@/api/services';
+import * as utils from '@/assets/script/utils';
 
 import SwipeView from '@/views/SwipeView.vue';
 import VoteView from '@/views/VoteView.vue';
 import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
 import ModaleInfoMain from '@/modales/ModaleInfoMain.vue';
-
-
 
 const socket = io(apiURL);
 
@@ -57,7 +58,11 @@ export default {
             userBucket: [],
 
             movies: [], //La liste de tous les films de la room, chargés une fois pour améliorer les performances
-            moviesBucketRoom: [] //La liste des films du bucket de la room 
+            moviesBucketRoom: [], //La liste des films du bucket de la room 
+
+            leftRoomClick: 0,
+
+            updated: false,
         }
     },
 
@@ -73,6 +78,7 @@ export default {
         socket.on(`updateRoom:${this.$route.params.roomCode}`, async () => {
             await this.updateRoom();
             this.setBucketRoom();
+            this.updated = !this.updated;
         });
     },
 
@@ -125,8 +131,23 @@ export default {
             return room;
         },
 
-        leftRoom() {
-            console.log(this.userBucket);
+        async leftRoom() {
+            if(this.leftRoomClick == 0) {
+                this.leftRoomClick++;
+                utils.showSnackbar('Appuyez à nouveau pour quitter', 2000)
+                setTimeout(() => {
+                    this.leftRoomClick = 0;
+                }, 2000);
+            } else {
+                utils.hideSnackbar()
+                let data = {
+                    "code": this.$route.params.roomCode,
+                    "watcher_id": sessionStorage.getItem('watcherId')
+                }
+                await del(`room/leave`, data);
+                sessionStorage.removeItem('watcherId');
+                this.$router.push({ name: 'home' });
+            }
         },
 
         async validStep1() {

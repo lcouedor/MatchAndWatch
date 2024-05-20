@@ -3,8 +3,6 @@
 .listFilmsToRate{
     display: flex;
     flex-direction: column;
-    height: 90vh;
-    overflow: auto;
 
     &>div{
         margin-bottom: 4vh;
@@ -20,7 +18,7 @@
     .cardImg{
         position: relative;
         width: 60vw;
-        height: 40vh;
+        height: 40dvh;
         margin-bottom: 1vh;
         margin-top: 1vh;
         background-color: #948d9b6d;
@@ -32,7 +30,7 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            height: 40vh;
+            height: 40dvh;
             backface-visibility: hidden;
 
             &:nth-child(1){
@@ -43,7 +41,7 @@
         .overviewCardZone{
             transform: rotateY(180deg);
             backface-visibility: hidden;
-            height: 40vh;
+            height: 40dvh;
             padding: 2vh;
             overflow-y: auto;
             background-color: rgba(0, 0, 0);
@@ -88,11 +86,11 @@
     }
 
     .nono, .no{
-        border-color: $accentColor;
+        border-color: $secondaryColor;
     }
 
     .okok, .ok{
-        border-color: $borderColor;
+        border-color: $accentColor;
     }
 }
 
@@ -102,11 +100,11 @@
     background-color: grey;
 
     &.no, &.nono{
-        background-color: $accentColor !important;
+        background-color: $secondaryColor !important;
     }
 
     &.ok, &.okok{
-        background-color: $borderColor !important;
+        background-color: $accentColor !important;
     }
 }
 
