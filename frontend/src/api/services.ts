@@ -1,7 +1,7 @@
 import axios from "axios";
 
-export const apiURL = "https://matchandwatch.fun:3333";
-// export const apiURL = "http://localhost:3333";
+// export const apiURL = "https://matchandwatch.fun:3333";
+export const apiURL = "http://localhost:3333";
 
 export async function getAll(path: string): Promise<any> {
   try {
