@@ -1,0 +1,130 @@
+@use 'variables' as *;
+
+.bandeauSwipe{
+    width: 100vw;
+    padding: 1vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: $sousTitreFontSizes;
+    color: $textColorPrimary;
+}
+
+.containerFilms{
+    position: relative;
+    height: 44dvh; //La hauteur de la carte + 2vh de marge en haut et en bas
+}
+
+.backgroundCard, .swipeCard{
+    height: 40dvh;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    img{
+        height: 40dvh;
+        border-radius: 15px;
+    }
+}
+
+.backgroundCard img{
+    margin-top: 2vh;
+}
+
+.titre{
+    color: $primaryColor;
+    font-size: 2em;
+    width: 100vw;
+
+    display: table-cell;
+    text-align: center;
+    
+}
+
+.swipeCard{
+    padding: 2vh;
+    position: relative;
+
+
+    .parentImage{
+        overflow: hidden;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+
+        transform-origin: center;
+
+        border-radius: 15px;
+
+        display: flex;
+
+        img{
+            position: relative;
+            top: 0;
+        }
+    }
+}
+
+#leftZone, #rightZone{
+    pointer-events: none;
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    span{
+        font-size: $sousTitreFontSizes;
+        color: $textColorPrimary;
+        position: absolute;
+        bottom: 1%;
+
+        //Le texte à une ombre portée
+        text-shadow: 3px 3px $secondaryColor;
+        background-color: #d4e09b79;
+        border: 2px solid $textColorPrimary;
+        border-radius: $stdRadius;
+
+        display: flex;
+        justify-content: center;
+        padding: 1vh;
+    
+    }
+
+    .background{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    
+        opacity: 0;
+    }
+}
+
+#leftZone{
+    .background{
+        background-color: red;
+        
+    }
+    span{
+        right: 2%;
+    }
+}
+
+#rightZone{
+    .background{
+        background-color: green;
+    }
+    span{
+        left: 2%;
+    }
+}
+
+.overviewZone{
+    padding: 2vh;
+    font-size: $textFontSizes;
+    color: $textColorPrimary;
+    text-align: justify;
+}

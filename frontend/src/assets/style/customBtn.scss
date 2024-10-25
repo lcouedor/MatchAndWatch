@@ -1,0 +1,18 @@
+@use 'variables' as *;
+
+.customBigBtn{
+    background-color: $primaryColor;
+    border: none;
+    border-radius: $stdRadius;
+    font-size: 2em;
+    width: 80%;
+    height: 10vh;
+
+    margin: 2vh;
+
+    cursor: pointer;
+    color: $textColorPrimary;
+
+    //deux ombres en dessous
+    box-shadow: 0 3px 0 $secondaryColor, 0 6px 0 $accentColor;
+}

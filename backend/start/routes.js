@@ -19,3 +19,21 @@ const Route = use('Route')
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }
 })
+
+//Routes des watchers
+Route.post('/watcher', 'WatcherController.create')
+Route.delete('/watcher/:id', 'WatcherController.delete')
+Route.get('/watcher', 'WatcherController.index')
+
+//Routes des rooms
+Route.post('/room', 'RoomController.create')
+Route.delete('/room', 'RoomController.delete')
+Route.get('/room', 'RoomController.index')
+Route.post('/room/join', 'RoomController.join')
+Route.get('/room/:code', 'RoomController.getByCode')
+Route.delete('/room/leave', 'RoomController.leave')
+Route.post('/room/addFilmBucket', 'RoomController.watcherAddFilmsToBucket')
+Route.post('/room/voteForFilm', 'RoomController.watcherVoteForFilm')
+
+//Routes annexes
+Route.get('/movie', 'RoomController.getMovie')

@@ -1,0 +1,50 @@
+@use 'variables' as *;
+
+.resultList{
+    display: flex;
+    flex-direction: column;
+
+    .imgContainer{
+        margin-top: 3vh;
+        margin-bottom: 3vh;
+        position: relative;
+        height: 40dvh;
+        width: 100vw;
+
+        img{
+            position: absolute;
+            height: 40dvh;
+
+            &:nth-child(1){
+                filter: blur(20px);
+            }
+        }
+    }
+
+    div{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dataFilm{
+        display: flex;
+        color: $textColorPrimary;
+        font-size: $textFontSizes;
+
+        .genresList{
+            background-color: $primaryColor;
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            margin: 1vh;
+
+            p{
+                padding: 1vh;
+            }
+        }
+    }
+   
+}

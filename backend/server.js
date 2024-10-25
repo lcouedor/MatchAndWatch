@@ -23,3 +23,27 @@ new Ignitor(require('@adonisjs/fold'))
   .appRoot(__dirname)
   .fireHttpServer()
   .catch(console.error)
+
+
+
+
+
+
+
+
+// const { Ignitor } = require('@adonisjs/ignitor')
+// const https = require('https')
+// const fs = require('fs')
+
+// // Certificate
+// const options = {
+//   key: fs.readFileSync("/etc/letsencrypt/live/matchandwatch.fun/privkey.pem"),
+//   cert: fs.readFileSync("/etc/letsencrypt/live/matchandwatch.fun/fullchain.pem")
+// }
+
+// new Ignitor(require('@adonisjs/fold'))
+//   .appRoot(__dirname)
+//   .fireHttpServer((handler) => {
+//     return https.createServer(options, handler)
+//   })
+//   .catch(console.error)
