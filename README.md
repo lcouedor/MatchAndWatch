@@ -29,4 +29,3 @@ VueJS + TS
 Lancement : ‘npm run serve‘ ou ‘npm run build‘
 
 ## !!Application actuellement en version POC!!
-##
