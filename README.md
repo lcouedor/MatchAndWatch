@@ -6,7 +6,7 @@ Fonctionnement :
 - Créer une room (une seule personne du groupe créé la room)
 - Les autres rejoignent la room (grâce au code)
 - Étape 1 : Swiper les films (jusqu'à liker autant de films qu'indiqué dans la configuration de la room, ou passer tous les films proposés)
-- Étape 2 : Une fois que tout le monde a swiper, on vote parmi tous les films likés par tous les membres de la room
+- Étape 2 : Une fois que tout le monde a swipé, on vote parmi tous les films likés par tous les membres de la room
 - Étape 3 : Le film le plus adapté pour tout le monde est déterminé selon les votes
 
 On ne peut pas rejoindre une room une fois l'étape 2 atteinte par tout ceux déjà présents.
