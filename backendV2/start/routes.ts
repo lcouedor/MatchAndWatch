@@ -42,3 +42,11 @@ Route.get('/watcher', 'WatcherController.index')
 
 //Routes annexes
 Route.get('/movie', 'RoomController.getMovie')
+
+Route.any('*', async ({ request, response }) => {
+  if (request.method() === 'OPTIONS') {
+    return response.status(204).send('')
+  }
+
+  return response.status(404).send('Route not found')
+})

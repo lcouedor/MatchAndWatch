@@ -8,7 +8,7 @@ export default class Watchers extends BaseSchema {
       table.increments('id').primary()
       table.string('name').notNullable()
       table.integer('room_id').unsigned().references('id').inTable('rooms').onDelete('CASCADE')
-      table.integer('step').notNullable()
+      table.integer('step').notNullable().defaultTo(0)
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
     })

@@ -3,7 +3,7 @@ import Room from 'App/Models/Room'
 import { DateTime } from 'luxon'
 
 export default class Watcher extends BaseModel {
-  public static table = 'watcher'
+  public static table = 'watchers'
 
   @column({ isPrimary: true })
   public id: number
