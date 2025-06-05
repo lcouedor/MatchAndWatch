@@ -1,15 +1,7 @@
 <template>
     <button class="customBigBtn">
-        {{ text }}
+        <slot></slot>
     </button>
 </template>
 
-<script>
-export default {
-    name: 'Button',
-    props: {
-        text: String,
-    },
-
-}
-</script>
+<!-- TODO faire des styles scoped -->

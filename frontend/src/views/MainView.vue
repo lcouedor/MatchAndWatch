@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import { get, apiURL, post, getMovie, del } from '@/api/services';
 import * as utils from '@/assets/script/utils';
 
@@ -43,7 +43,7 @@ import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
 import ModaleInfoMain from '@/modales/ModaleInfoMain.vue';
 
-const socket = io(apiURL);
+// const socket = io(apiURL);
 
 export default {
     name: 'MainVue',
@@ -74,11 +74,11 @@ export default {
     },
 
     async created() {
-        socket.on(`updateRoom:${this.$route.params.roomCode}`, async () => {
-            await this.updateRoom();
-            this.setBucketRoom();
-            this.updated = !this.updated;
-        });
+        // socket.on(`updateRoom:${this.$route.params.roomCode}`, async () => {
+        //     await this.updateRoom();
+        //     this.setBucketRoom();
+        //     this.updated = !this.updated;
+        // });
     },
 
     async mounted() {
