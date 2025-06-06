@@ -31,12 +31,15 @@
 
 <script setup lang="ts">
 import Button from "@/components/Button.vue";
-import { post } from "@/api/services";
+import { post } from "../api/services";
 import ModalSlug from "./ModalSlug.vue";
 import { ref } from "vue";
 import Spinner from "@/components/Spinner.vue";
 import { useRouter } from 'vue-router'
-import { uppercaseChar } from "@/utils/utils";
+import { uppercaseChar } from "../utils/utils";
+import { Room } from "shared-types/room";
+import { Watcher } from "shared-types/watcher";
+import { apiResponse } from "shared-types/apiResponse";
 
 
 const router = useRouter()
@@ -77,15 +80,15 @@ const createRoom = async () => {
         bucket_size: selectedBucketSize.value,
     };
 
-    const room = await post("room", data);
+    const room: apiResponse<Room> | null = await post<Room>("room", data);
 
     // On ajoute ensuite le joueur à la room
     const watcherData = {
-        code: room.data.code,
+        code: room?.data?.code,
         watcher_name: inputNomWatcher.value,
     };
 
-    const watcher = await post("room/join", watcherData);
+    const watcher: apiResponse<Watcher> | null = await post<Watcher>("room/join", watcherData);
 
     // On cache la modale
     modaleCreateRoom.value?.dismissModal();
@@ -94,10 +97,10 @@ const createRoom = async () => {
     waiting.value = false;
 
     // On enregistre l'id watcher dans le local storage
-    sessionStorage.setItem("watcherId", watcher.data.watcher.id);
+    sessionStorage.setItem("watcherId", (watcher.data?.id)?.toString() ?? "");
 
     // On redirige vers la room
-    router.push("/match/" + room.data.code);
+    router.push("/match/" + room?.data?.code);
 };
 
 defineExpose({

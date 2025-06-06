@@ -1,31 +1,33 @@
 <template>
     <ModalSlug modaleId="modaleJoinRoom" ref="modaleJoinRoom">
         <h1>Rejoindre une Room</h1>
-            <div class="inputBloc">
-                <label>Quel est le code de la room ?</label>
-                <input v-model="inputRoomCodeContent" ref="inputRoomCode" @input="handleInputRoomCode()" maxlength="4">
-                <p class="errorMessage">{{ errors.code }}</p>
-            </div>
+        <div class="inputBloc">
+            <label>Quel est le code de la room ?</label>
+            <input v-model="inputRoomCodeContent" ref="inputRoomCode" @input="handleInputRoomCode()" maxlength="4">
+            <p class="errorMessage">{{ errors.code }}</p>
+        </div>
 
-            <div class="inputBloc">
-                <label>Comment t'appelles-tu Padawan ?</label>
-                <input v-model="inputNomWatcherContent" ref="inputNomWatcher" @input="handleInputNom()" maxlength="16">
-                <p class="errorMessage">{{ errors.name }}</p>
-            </div>
+        <div class="inputBloc">
+            <label>Comment t'appelles-tu Padawan ?</label>
+            <input v-model="inputNomWatcherContent" ref="inputNomWatcher" @input="handleInputNom()" maxlength="16">
+            <p class="errorMessage">{{ errors.name }}</p>
+        </div>
 
-            <div class="buttonsModal">
-                <Button @click="joinRoom">Rejoindre la Room</Button>
-            </div>
+        <div class="buttonsModal">
+            <Button @click="joinRoom">Rejoindre la Room</Button>
+        </div>
     </ModalSlug>
 </template>
 
 <script setup lang="ts">
 import Button from "@/components/Button.vue";
-import { post } from "@/api/services";
+import { post } from "../api/services";
 import ModalSlug from "./ModalSlug.vue";
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from 'vue-router'
-import { uppercaseChar } from "@/utils/utils";
+import { uppercaseChar } from "../utils/utils";
+import { Watcher } from "shared-types/watcher";
+import { apiResponse } from "shared-types/apiResponse";
 
 
 const router = useRouter();
@@ -82,35 +84,25 @@ const joinRoom = async () => {
         code: inputRoomCodeContent.value,
         watcher_name: inputNomWatcherContent.value,
     };
-    let watcher = await post('room/join', data);
+    let watcher: apiResponse<Watcher> | null = await post<Watcher>('room/join/', data);
     if (!watcher.success) {
         errors.value.code = 'Hum, ce code ne semble pas valide...';
         inputRoomCode.value?.classList.add('errorInput');
         return;
     }
-    //On cache la modale
     modaleJoinRoom.value?.dismissModal();
-    //On reset les champs
-    inputNomWatcherContent.value = '';
-    inputRoomCodeContent.value = '';
-    //On enregistre l'id watcher dans le session storage
-    sessionStorage.setItem('watcherId', watcher.data.watcher.id);
-    //On redirige vers la room
-    router.push('/match/' + watcher.data.roomCode);
+    sessionStorage.setItem('watcherId', (watcher.data?.id ?? '').toString());
+    router.push('/match/' + inputRoomCodeContent.value);
 };
 
-//au mount :
 onMounted(() => {
-    // const codeFromQuery = route.query.code as string | undefined
-    // if (codeFromQuery) {
-    //     inputRoomCodeContent.value = codeFromQuery.toUpperCase();
-    //     handleInputRoomCode();
-    // }
-//     if(this.$route.query.code){
-//         this.$refs.modalJoinRoom.classList.add("showModal");
-//         this.$refs.inputRoomCode.value = this.$route.query.code;
-//     }
-}); 
+    const codeFromQuery = route.query.code as string | undefined
+    if (codeFromQuery) {
+        modaleJoinRoom.value?.showModal();
+        inputRoomCodeContent.value = codeFromQuery.toUpperCase();
+        inputNomWatcher.value?.focus();
+    }
+});
 
 defineExpose({
     showModal() {

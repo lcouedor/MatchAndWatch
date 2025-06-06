@@ -83,7 +83,6 @@ export default {
 
     computed: {
         watcherList() {
-            console.log
             //on retourne les watchers de la room moins soi-même
             return this.room.data.watchers.filter(watcher => watcher.id != this.watcherId);
         }

@@ -11,7 +11,7 @@
 
     <div v-else class="stepPage">
         <div class="bandeauSwipe">
-            {{ $parent.userBucket.length }}/{{ room.data.bucket_size }} films likés
+            {{ userBucket.length }}/{{ room?.bucket_size }} films likés
         </div>
 
         <div class="titre" v-if="currentFilm">
@@ -23,15 +23,16 @@
                 <img :src="`https://image.tmdb.org/t/p/w780/${film.poster_path}`" alt="Affiche du film">
             </div>
 
-            <div v-if="currentFilm" class="swipeCard" id="swipeCard">
+            <div v-if="currentFilm" class="swipeCard">
                 <div class="parentImage">
+                    <!-- TODO mettre le chemin dans un fichier de conf -->
                     <img :src="`https://image.tmdb.org/t/p/w780/${currentFilm.poster_path}`" alt="Affiche du film"
-                        @touchstart="onDragStart" @touchmove="onDragMove" @touchend="onDragEnd">
-                    <div id="leftZone">
+                        @touchstart="onDragStart" @touchmove="onDragMove" @touchend="onDragEnd" ref="card">
+                    <div id="leftZone" ref="actualLeft">
                         <div class="background"></div>
                         <span>No Watch</span>
                     </div>
-                    <div id="rightZone">
+                    <div id="rightZone" ref="actualRight">
                         <div class="background"></div>
                         <span>Watch</span>
                     </div>
@@ -48,186 +49,131 @@
 
 </template>
 
-<script>
-export default {
-    name: 'SwipeView',
+<script setup lang="ts">
 
-    data() {
-        return {
-            films: [],
-            displayFilms: [],
-            currentFilm: null,
+import { onMounted, ref, defineProps, watch } from "vue";
 
-            initialX: 0,
-            initialLeft: 0,
+import { Room } from '../../../shared-types/room';
+import { Watcher } from '../../../shared-types/watcher';
+import { apiResponse } from 'shared-types/apiResponse';
+import { TMDBFilm } from '../../../shared-types/tmdb';
 
-            card: null,
-            actualLeft: null,
-            actualRight: null,
-        }
-    },
 
-    props: {
-        room: {
-            type: Object,
-            default: null
-        },
-        movies: {
-            type: Array,
-            default: []
-        },
-        ready: {
-            type: Boolean,
-            default: false
-        },
-    },
+const films = ref<TMDBFilm[]>([]);
+const displayFilms = ref<TMDBFilm[]>([]);
+const currentFilm = ref<TMDBFilm | null>(null);
+const initialX = ref(0);
+const initialLeft = ref(0);
+const card = ref<HTMLElement | null>(null);
+const actualLeft = ref<HTMLElement | null>(null);
+const actualRight = ref<HTMLElement | null>(null);
 
-    watch: {
-        ready: {
-            immediate: true,
-            handler() {
-                if (this.ready) {
-                    // Une fois que les films sont chargés, on les copie dans films
-                    this.films = this.movies;
-                    this.displayFilms = [...this.films];
-                    //On shuffle les films à afficher
-                    this.displayFilms = this.displayFilms.sort((a, b) => 0.5 - Math.random());
-                    this.currentFilm = this.displayFilms.pop();
-                }
-            }
-        },
-    },
+const props = defineProps<{
+    room: Room | null,
+    movies: TMDBFilm[],
+    userBucket: TMDBFilm[],
+    ready: boolean
+}>();
 
-    methods: {
-        //Les fonctions pour le swipe
-        onDragStart(e) {
-            this.initialX = e.touches[0].clientX;
+const emit = defineEmits<{
+    (event: 'validStep1'): void;
+}>();
 
-            //On récupère l'élement à déplacer horizontalement
-            this.card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
-            this.actualLeft = this.card.querySelector("#leftZone")
-            this.actualRight = this.card.querySelector("#rightZone")
-            this.initialLeft = this.card.getBoundingClientRect().left;
-        },
-        onDragMove(e) {
-            //On récupère la position actuelle de la souris
-            let currentX = e.touches[0].clientX;
-
-            //Si la moitié de l'image est hors de l'écran, on ne fait rien
-            if (currentX < 0 || currentX > window.innerWidth) {
-                return;
-            }
-
-            //On calcule la distance parcourue par la souris depuis le début du drag
-            let diff = currentX - this.initialX;
-
-            //On déplace l'élement horizontalement avec un translateX
-            this.card.style.transform = `translateX(calc(-50% + ${diff}px))`;
-
-            //On regarde la position du centre de l'image
-            let cardCenter = this.card.getBoundingClientRect().left + this.card.getBoundingClientRect().width / 2;
-
-            //On regarde si l'image est dans le quart gauche, le quart droit ou le milieu
-            if (cardCenter < window.innerWidth / 4) {
-                //On ajoute une rotation à l'image
-                let rotation = (cardCenter - window.innerWidth / 4) / (window.innerWidth / 4) * 30;
-                this.card.style.transform = `translateX(calc(-50% + ${diff}px)) rotate(${rotation}deg)`;
-
-                //On rend visible la zone de gauche
-                let opacity = (window.innerWidth / 4 - cardCenter) / (window.innerWidth / 4) * 0.5;
-                this.actualLeft.getElementsByClassName("background")[0].style.opacity = opacity;
-                this.actualLeft.style.opacity = 1;
-            } else if (cardCenter > window.innerWidth * 3 / 4) {
-                //On ajoute une rotation à l'image
-                let rotation = (cardCenter - window.innerWidth * 3 / 4) / (window.innerWidth / 4) * 30;
-                this.card.style.transform = `translateX(calc(-50% + ${diff}px)) rotate(${rotation}deg)`;
-
-                //On rend visible la zone de droite (opacité qui dépend de la position de la souris) de 0 à 0.5
-                let opacity = (cardCenter - window.innerWidth * 3 / 4) / (window.innerWidth / 4) * 0.5;
-                this.actualRight.getElementsByClassName("background")[0].style.opacity = opacity;
-                this.actualRight.style.opacity = 1;
-            } else {
-                this.actualRight.style.opacity = 0;
-                this.actualLeft.style.opacity = 0;
-            }
-        },
-        onDragEnd() {
-            let transitionDuration = 500;
-
-            let card = document.getElementById('swipeCard').getElementsByClassName('parentImage')[0];
-            let cardCenter = card.getBoundingClientRect().left + card.getBoundingClientRect().width / 2;
-
-            //On regarde si l'image est dans le quart gauche, le quart droit ou le milieu
-            if (cardCenter < window.innerWidth / 4) {
-                card.style.left = '-150%';
-                //on met une transition pour l'animation
-                card.style.transition = 'all ' + transitionDuration + 'ms, transform ' + transitionDuration + 'ms';
-
-                setTimeout(() => {
-                    //On retire le film de la liste
-                    this.currentFilm = this.displayFilms.pop();
-
-                    if (!this.currentFilm) {
-                        this.$parent.validStep1();
-                    }
-
-                    //On remet l'élément au centre sans transition
-                    card.style.left = '50%';
-                    card.style.transform = 'translateX(-50%)';
-                    card.style.transition = 'none';
-
-                    //On rend invisible les zones
-                    this.actualLeft.style.opacity = 0;
-                    this.actualRight.style.opacity = 0;
-                }, transitionDuration);
-            } else if (cardCenter > window.innerWidth * 3 / 4) {
-                card.style.left = '150%';
-                //on met une transition pour l'animation
-                card.style.transition = 'all ' + transitionDuration + 'ms, transform ' + transitionDuration + 'ms';
-
-                setTimeout(() => {
-                    //On ajoute le film dans le bucket
-                    this.$parent.userBucket.push(this.currentFilm);
-
-                    //On regarde si on a atteint le nombre de films à liker
-                    if (this.$parent.userBucket.length == this.room.data.bucket_size) {
-                        //On change d'étape
-                        this.$parent.validStep1();
-                    }
-
-                    //On retire le film de la liste
-                    this.currentFilm = this.displayFilms.pop();
-
-                    if (!this.currentFilm) {
-                        this.$parent.validStep1();
-                    }
-
-                    //On remet l'élément au centre sans transition
-                    card.style.left = '50%';
-                    card.style.transform = 'translateX(-50%)';
-                    card.style.transition = 'none';
-
-                    //On rend invisible les zones
-                    this.actualLeft.style.opacity = 0;
-                    this.actualRight.style.opacity = 0;
-                }, transitionDuration);
-
-            } else {
-                //On remet l'élément au centre
-                card.style.left = '50%';
-                card.style.transform = 'translateX(-50%)';
-
-                //Il y a une transition pour le replacement de l'élément
-                card.style.transition = 'all ' + transitionDuration + 'ms, transform ' + transitionDuration + 'ms';
-
-                setTimeout(() => {
-                    //On retire la transition
-                    card.style.transition = 'none';
-                }, transitionDuration);
-            }
-        }
+watch(() => props.ready, (newReady) => {
+    if (newReady) {
+        // Une fois que les films sont chargés, on les copie dans films
+        films.value = props.movies;
+        displayFilms.value = [...films.value];
+        // On shuffle les films à afficher
+        displayFilms.value = displayFilms.value.sort(() => 0.5 - Math.random());
+        currentFilm.value = displayFilms.value.pop() || null;
     }
+});
+const getCardCenter = () =>
+    card.value!.getBoundingClientRect().left + card.value!.offsetWidth / 2;
 
+const resetCard = () => {
+    card.value!.style.left = '50%';
+    card.value!.style.transform = 'translateX(-50%)';
+    card.value!.style.transition = 'none';
+    actualLeft.value!.style.opacity = '0';
+    actualRight.value!.style.opacity = '0';
+};
 
+const animateCard = (dir: 'left' | 'right', callback: () => void) => {
+    //TODO mettre dans un fichier de conf
+    const duration: number = 200; // Duration of the animation in ms
+    card.value!.style.left = dir === 'left' ? '-100%' : '100%';
+    card.value!.style.transition = `all ${duration}ms, transform ${duration}ms`;
+
+    setTimeout(() => {
+        callback();
+        resetCard();
+    }, duration);
+};
+
+const onDragStart = (e: TouchEvent) => {
+    initialX.value = e.touches[0].clientX;
+    initialLeft.value = card.value?.getBoundingClientRect().left ?? 0;
+    resetCard();
+};
+const onDragMove = (e: TouchEvent) => {
+
+    const setOpacity = (zone: HTMLElement, amount: number) => {
+        (zone.querySelector('.background') as HTMLElement).style.opacity = amount.toString();
+        zone.style.opacity = '1';
+    };
+
+    if (!card.value) return;
+
+    const diff = e.touches[0].clientX - initialX.value;
+    const quarter = window.innerWidth / 4;
+
+    if (diff < -quarter) {
+        // Swipe vers la gauche au-delà du quart gauche
+        let rotation = ((diff + quarter) / quarter) * 30;
+        if (rotation < -30) rotation = -30;
+        card.value.style.transform = `translateX(calc(-50% + ${diff}px)) rotate(${rotation}deg)`;
+        setOpacity(actualLeft.value!, Math.min(Math.abs(diff + quarter) / quarter * 0.5, 0.5));
+        actualRight.value!.style.opacity = '0';
+    } else if (diff > quarter) {
+        // Swipe vers la droite au-delà du 3/4 droite (ici simplifié à quarter à droite)
+        let rotation = ((diff - quarter) / quarter) * 30;
+        if (rotation > 30) rotation = 30;
+        card.value.style.transform = `translateX(calc(-50% + ${diff}px)) rotate(${rotation}deg)`;
+        setOpacity(actualRight.value!, Math.min((diff - quarter) / quarter * 0.5, 0.5));
+        actualLeft.value!.style.opacity = '0';
+    } else {
+        // Zone morte au centre, pas de rotation ni opacité
+        card.value.style.transform = `translateX(calc(-50% + ${diff}px))`;
+        actualLeft.value!.style.opacity = '0';
+        actualRight.value!.style.opacity = '0';
+    }
+};
+
+const onDragEnd = () => {
+    if (!card.value) return;
+
+    const center = getCardCenter();
+    const quarter = window.innerWidth / 4;
+
+    if (center < quarter) {
+        animateCard('left', () => {
+            currentFilm.value = displayFilms.value.pop() || null;
+        });
+    } else if (center > 3 * quarter) {
+        animateCard('right', () => {
+            if (currentFilm.value) props.userBucket.push(currentFilm.value);
+            if (props.userBucket.length === props.room?.bucket_size || displayFilms.value.length === 0) {
+                emit('validStep1');
+            }
+            currentFilm.value = displayFilms.value.pop() || null;
+        });
+    } else {
+        card.value!.style.left = '50%';
+        card.value!.style.transform = 'translateX(-50%)';
+        card.value!.style.transition = `all 500ms, transform 500ms`;
+        setTimeout(() => (card.value!.style.transition = 'none'), 500);
+    }
 };
 </script>
