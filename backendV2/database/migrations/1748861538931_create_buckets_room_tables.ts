@@ -9,7 +9,7 @@ export default class BucketsRooms extends BaseSchema {
       table.integer('room_id').unsigned().references('id').inTable('rooms').onDelete('CASCADE')
       table.integer('film_id').notNullable()
       table.integer('weight').defaultTo(0).notNullable()
-      table.boolean('is_active').defaultTo(true).notNullable()
+      table.boolean('is_active').defaultTo(false).notNullable()
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).notNullable()
     })

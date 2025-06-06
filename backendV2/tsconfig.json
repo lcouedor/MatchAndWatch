@@ -9,7 +9,7 @@
   ],
   "compilerOptions": {
     "outDir": "build",
-    "rootDir": "./",
+    "rootDir": "../",
     "baseUrl": "./",
     "sourceMap": true,
     "paths": {
