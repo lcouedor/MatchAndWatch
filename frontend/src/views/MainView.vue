@@ -15,14 +15,14 @@
 
             <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
 
-            <span class="info" @click="showInfoModal" v-if="userStep == 1 || userStep == 2">i</span>
+            <span class="info" @click="showInfoModal" v-if="userStep in [0,1]">i</span>
         </div>
 
         <SwipeView :room="room" :ready="ready" :movies="moviesList" :userBucket="userBucket" v-if="userStep == 0" @validStep1="validStep1"/>
         <VoteView :room="room" :movies="moviesList" v-if="userStep == 1" @validStep2="validStep2"/>
         <ResultsView :room="room" :movies="moviesList" v-if="userStep == 2" />
 
-        <ModaleInfo ref="modaleInfo" :page="2" />
+        <ModaleInfo ref="modaleInfo" :page="userStep" />
     </div>
 
 </template>
@@ -203,9 +203,4 @@ const validStep2 = async (selectedNotes: Map<number, number>) => {
         alert('Erreur lors du vote pour les films');
     }
 };
-
-//TODO remettre info
-//     displayInfo() {
-//         document.getElementById('modaleInfoMain').classList.toggle('showModal');
-//     }
 </script>

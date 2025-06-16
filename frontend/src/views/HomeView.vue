@@ -9,7 +9,7 @@
 
 	<div class="info" @click="showModal('modaleInfo')">i</div>
 
-	<ModaleInfo ref="modaleInfo" :page="0" />
+	<ModaleInfo ref="modaleInfo" :page="-1" />
 	<ModaleCreateRoom ref="modaleCreateRoom" />
 	<ModaleJoinRoom ref="modaleJoinRoom" />
 
