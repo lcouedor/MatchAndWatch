@@ -5,9 +5,7 @@
             <div v-for="watcher in watcherList" :key="watcher.id" class="watcherInWait"
                 :class="watcher.step == 1 ? 'waitingWatcher' : ''">
                 {{ watcher.name }}
-                <div class="waiting waitingVisible">
-                    <div class="spin"></div>
-                </div>
+                <Spinner></Spinner>
             </div>
         </div>
     </div>
@@ -44,6 +42,7 @@ import { ref, defineProps, computed } from "vue";
 
 import { Room } from "shared-types/room";
 import { TMDBFilm } from "shared-types/tmdb";
+import Spinner from "@/components/Spinner.vue";
 
 const props = defineProps<{
     room: Room | null,

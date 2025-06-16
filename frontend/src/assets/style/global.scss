@@ -72,7 +72,7 @@ select, input{
 }
 
 .waiting{
-    display: none;
+    display: flex;
     align-items: center;
 
     .spin{
@@ -90,10 +90,6 @@ select, input{
         //Un halo autour du cercle
         box-shadow: 0 0 0 1px $primaryColor, 0 0 0 2px $accentColor;
     }
-}
-
-.waitingVisible{
-    display: flex;
 }
 
 @keyframes spin {
@@ -255,7 +251,6 @@ select, input{
     
     margin-bottom: auto;
 
-
     .watcherInWait{
         margin: 1vh;
         display: flex;
@@ -267,13 +262,6 @@ select, input{
         font-size: $textFontSizes;
         color: white;
         background-color: $primaryColor;
-
-        &>.waitingVisible{
-            display: none;
-        }
-    }
-    .waitingWatcher .waitingVisible{
-        display: flex;
     }
 }
 

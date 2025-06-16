@@ -1,6 +1,5 @@
 <template>
-  <!-- TODO retirer le waitingVisible et toujours mettre en visible -->
-  <div class="waiting waitingVisible">
+  <div class="waiting">
     <div class="spin"></div>
     <slot></slot>
   </div>

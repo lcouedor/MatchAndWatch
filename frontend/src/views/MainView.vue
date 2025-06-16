@@ -62,6 +62,7 @@ const userBucket = ref<TMDBFilm[]>([]); // Films selected by the user
 const ready = ref<boolean>(false);
 const userStep = ref<number>(0); // 0: Choix des films, 1: Vote, 2: Résultats
 const leftRoomClick = ref<number>(0);
+let snackbarId: number | null = null;
 
 onMounted(async () => {
     await updateRoom();
@@ -96,13 +97,12 @@ const copyToClipboard = async () => {
 };
 
 const leftRoom = async () => {
-    const snackbarId: number | null = null;
     if (leftRoomClick.value == 0) {
         leftRoomClick.value++;
-        const snackbarId = triggerSnackbar('Appuyez à nouveau pour quitter', 2000)
+        snackbarId = triggerSnackbar('Appuyez à nouveau pour quitter', 20000)
         setTimeout(() => {
             leftRoomClick.value = 0;
-        }, 2000);
+        }, 20000);
     } else {
         hideSnackbar(snackbarId || 0);
         const data = {
