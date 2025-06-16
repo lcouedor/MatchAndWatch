@@ -96,22 +96,23 @@ const copyToClipboard = async () => {
 };
 
 const leftRoom = async () => {
+    const snackbarId: number | null = null;
     if (leftRoomClick.value == 0) {
         leftRoomClick.value++;
-        triggerSnackbar('Appuyez à nouveau pour quitter', 2000)
+        const snackbarId = triggerSnackbar('Appuyez à nouveau pour quitter', 2000)
         setTimeout(() => {
             leftRoomClick.value = 0;
         }, 2000);
     } else {
-        hideSnackbar();
-        // const data = {
-        //     code: roomCode,
-        //     watcher_id: sessionStorage.getItem('watcherId')
-        // };
-        // await del('room/leave', data);
-        // sessionStorage.removeItem('watcherId');
-        // // Redirect to home
-        // router.push({ name: 'home' });
+        hideSnackbar(snackbarId || 0);
+        const data = {
+            code: roomCode,
+            watcher_id: sessionStorage.getItem('watcherId')
+        };
+        await del('room/leave', data);
+        sessionStorage.removeItem('watcherId');
+        // Redirect to home
+        router.push({ name: 'home' });
     }
 };
 
