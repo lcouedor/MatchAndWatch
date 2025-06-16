@@ -37,8 +37,8 @@ import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
 import ModaleInfo from '@/modales/ModaleInfo.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, ref, watch } from "vue";
-import { showSnackbar, hideSnackbar } from '../utils/utils';
+import { onMounted, onUnmounted, ref } from "vue";
+import { triggerSnackbar, hideSnackbar } from '../utils/utils';
 
 import { Room } from '../../../shared-types/room';
 import { Watcher } from '../../../shared-types/watcher';
@@ -67,7 +67,10 @@ onMounted(async () => {
     await updateRoom();
     moviesList.value = await getFilms();
 
-    socket.on(`updateRoom:${roomCode}`, async () => {
+    socket.on(`updateRoom:${roomCode}`, async (message: {display: boolean, message: string}) => {
+        if(message.display){
+            triggerSnackbar(message.message, 3000);
+        }
         await updateRoom();
     });
 
@@ -95,22 +98,26 @@ const copyToClipboard = async () => {
 const leftRoom = async () => {
     if (leftRoomClick.value == 0) {
         leftRoomClick.value++;
-        showSnackbar('Appuyez à nouveau pour quitter', 2000)
+        triggerSnackbar('Appuyez à nouveau pour quitter', 2000)
         setTimeout(() => {
             leftRoomClick.value = 0;
         }, 2000);
     } else {
         hideSnackbar();
-        const data = {
-            code: roomCode,
-            watcher_id: sessionStorage.getItem('watcherId')
-        };
-        await del('room/leave', data);
-        sessionStorage.removeItem('watcherId');
-        // Redirect to home
-        router.push({ name: 'home' });
+        // const data = {
+        //     code: roomCode,
+        //     watcher_id: sessionStorage.getItem('watcherId')
+        // };
+        // await del('room/leave', data);
+        // sessionStorage.removeItem('watcherId');
+        // // Redirect to home
+        // router.push({ name: 'home' });
     }
 };
+
+onUnmounted(() => {
+    socket.off(`updateRoom:${roomCode}`);
+});
 
 const updateRoom = async () => {
     room.value = await getRoom();

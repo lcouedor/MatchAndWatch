@@ -118,7 +118,7 @@ select, input{
     margin-right: 1vh;
 }
 
-#snackbar{
+.snackbar{
     position: absolute;
     bottom: -20%;
     left: 50%;
@@ -132,15 +132,11 @@ select, input{
     display: table-cell;
     text-align: center;
     z-index: 2000;
-
-    transition: all 0.3s;
 }
 
 .snackbarVisible{
     pointer-events: auto;
-    bottom: 2% !important;
-
-    transition: all 0.3s;
+    bottom: 2%;
 }
 
 //la zone Main (donc une fois dans la room)

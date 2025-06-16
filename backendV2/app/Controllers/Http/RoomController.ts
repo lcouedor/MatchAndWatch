@@ -89,7 +89,10 @@ export default class RoomController {
             // On ajoute le watcher à la room (optionnel ici, car create l'ajoute déjà normalement)
             await room.related("watchers").save(watcher);
 
-            Ws.io.emit(`updateRoom:${code}`, "update");
+            Ws.io.emit(`updateRoom:${code}`, {
+                display: true,
+                message: `Le watcher ${watcher_name} a rejoint la room`,
+            });
 
             return response
                 .status(200)
@@ -102,51 +105,64 @@ export default class RoomController {
         }
     }
 
-    // async leave({ request, response }) {
-    //     try {
-    //         const { code, watcher_id } = request.only(["code", "watcher_id"]);
+    async leave({ request, response }) {
+        try {
+            const { code, watcher_id } = request.only(["code", "watcher_id"]);
 
-    //         const room = await Room.findBy("code", code);
+            const room = await Room.findBy("code", code);
 
-    //         if (!room) {
-    //             return response.status(404).json({ error: "Room not found" });
-    //         }
+            if (!room) {
+                return response.status(404).json({ error: "Room not found" });
+            }
 
-    //         const watcher = await Watcher.find(watcher_id);
-    //         if (!watcher) {
-    //             return response
-    //                 .status(404)
-    //                 .json({ error: "Watcher not found" });
-    //         }
+            const watcher = await Watcher.find(watcher_id);
+            if (!watcher) {
+                return response
+                    .status(404)
+                    .json({ error: "Watcher not found" });
+            }
 
-    //         //On vérifie si le watcher est déjà dans la room
-    //         const isWatcherInRoom = await Room.isWatcherIsInRoom(watcher, room);
-    //         if (!isWatcherInRoom) {
-    //             return response
-    //                 .status(400)
-    //                 .json({ error: "Watcher is not in the room" });
-    //         }
+            //On vérifie si le watcher est déjà dans la room
+            const isWatcherInRoom = await Room.isWatcherIsInRoom(watcher, room);
+            if (!isWatcherInRoom) {
+                return response
+                    .status(400)
+                    .json({ error: "Watcher is not in the room" });
+            }
 
-    //         //On supprime le watcher de la base de données
-    //         await watcher.delete();
+            //On supprime le watcher de la base de données
+            await watcher.delete();
 
-    //         const responseData: apiResponse<Watcher> = {
-    //             success: true,
-    //             message: `Watcher with id ${watcher_id} left room with code ${code}`,
-    //         };
+            //On émet un événement pour mettre à jour la room
+            Ws.io.emit(`updateRoom:${code}`, {
+                display: true,
+                message: `Le watcher ${watcher.name} a quitté la room`,
+            });
 
-    //         return response.status(200).json(responseData);
-    //     } catch (error) {
-    //         console.error(error);
+            const responseData: apiResponse<Watcher> = {
+                success: true,
+                message: `Watcher with id ${watcher_id} left room with code ${code}`,
+            };
 
-    //         const responseData: apiResponse<Watcher> = {
-    //             success: false,
-    //             error: "Could not leave room",
-    //         };
+            //Si la room n'a plus de watcher, on la supprime
+            const remainingWatchers = await room.related("watchers").query();
+            if (remainingWatchers.length === 0) {
+                await room.delete();
+                responseData.message += " and the room was deleted.";
+            }
 
-    //         return response.status(500).json(responseData);
-    //     }
-    // }
+            return response.status(200).json(responseData);
+        } catch (error) {
+            console.error(error);
+
+            const responseData: apiResponse<Watcher> = {
+                success: false,
+                error: "Could not leave room",
+            };
+
+            return response.status(500).json(responseData);
+        }
+    }
 
     public async getByCode({ params, response }: HttpContextContract) {
         try {
@@ -271,7 +287,11 @@ export default class RoomController {
             await watcher.merge({ step }).save();
 
             // On émet un événement pour mettre à jour la room
-            Ws.io.emit(`updateRoom:${code}`, "update");
+            Ws.io.emit(`updateRoom:${code}`, {
+                display: false,
+                message: ""
+            }
+            );
 
             return response.status(200).json({
                 success: true,
@@ -287,7 +307,11 @@ export default class RoomController {
 
     async watcherVoteForFilm({ request, response }) {
         try {
-            const { code, films, watcher_id } = request.only(["code", "films", "watcher_id"]) as {
+            const { code, films, watcher_id } = request.only([
+                "code",
+                "films",
+                "watcher_id",
+            ]) as {
                 code: string;
                 films: { id: number; note: number }[];
                 watcher_id: number;
@@ -344,7 +368,10 @@ export default class RoomController {
             await watcher.merge({ step: watcher.step + 1 }).save();
 
             // On émet un événement pour mettre à jour la room
-            Ws.io.emit(`updateRoom:${code}`, "update");
+            Ws.io.emit(`updateRoom:${code}`, {
+                display: false,
+                message: "",
+            });
 
             return response.status(200).json({
                 success: true,
