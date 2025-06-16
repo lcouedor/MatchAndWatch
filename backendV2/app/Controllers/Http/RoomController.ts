@@ -8,8 +8,8 @@ import type { TMDBFilm, TMDBFilmDetails } from "../../../../shared-types/tmdb";
 import { apiResponse } from "../../../../shared-types/apiResponse";
 import type { Room as RoomType } from "../../../../shared-types/room";
 import { translate } from "bing-translate-api";
-import Ws from 'App/Services/Ws'
-
+import Ws from "App/Services/Ws";
+import Database from "@ioc:Adonis/Lucid/Database";
 
 const tmdbService = new TMDBService();
 
@@ -89,9 +89,7 @@ export default class RoomController {
             // On ajoute le watcher à la room (optionnel ici, car create l'ajoute déjà normalement)
             await room.related("watchers").save(watcher);
 
-            // TODO: socket.io emit pour informer les watchers
-            // io.emit(`updateRoom:${code}`, 'update')
-            Ws.io.emit(`updateRoom:${code}`, 'update');
+            Ws.io.emit(`updateRoom:${code}`, "update");
 
             return response
                 .status(200)
@@ -229,7 +227,10 @@ export default class RoomController {
         }
     }
 
-    public async watcherAddFilmsToBucket({ request, response }: HttpContextContract) {
+    public async watcherAddFilmsToBucket({
+        request,
+        response,
+    }: HttpContextContract) {
         try {
             const { code, watcher_id, step, filmIds } = request.only([
                 "code",
@@ -259,7 +260,7 @@ export default class RoomController {
                     error: "Watcher not found",
                 } as apiResponse<Watcher>);
             }
-            
+
             //On passe is_active à true pour tous les ids de film présent dans filmIds
             await BucketRoom.query()
                 .whereIn("film_id", filmIds)
@@ -270,17 +271,88 @@ export default class RoomController {
             await watcher.merge({ step }).save();
 
             // On émet un événement pour mettre à jour la room
-            Ws.io.emit(`updateRoom:${code}`, 'update');
+            Ws.io.emit(`updateRoom:${code}`, "update");
 
             return response.status(200).json({
-                success: true
+                success: true,
             } as apiResponse<Watcher>);
-
         } catch (error) {
             console.error(error);
             return response.status(500).json({
                 success: false,
                 error: "Could not add films to bucket",
+            } as apiResponse<void>);
+        }
+    }
+
+    async watcherVoteForFilm({ request, response }) {
+        try {
+            const { code, films, watcher_id } = request.only(["code", "films", "watcher_id"]) as {
+                code: string;
+                films: { id: number; note: number }[];
+                watcher_id: number;
+            };
+
+            const room = await Room.findBy("code", code);
+
+            if (!room) {
+                return response.status(404).json({ error: "Room not found" });
+            }
+
+            // On vérifie si le watcher est dans la room
+            const watcher = await Watcher.find(watcher_id);
+            if (!watcher) {
+                return response.status(404).json({
+                    success: false,
+                    error: "Watcher not found",
+                } as apiResponse<Watcher>);
+            }
+            const isWatcherInRoom = await Room.isWatcherIsInRoom(watcher, room);
+            if (!isWatcherInRoom) {
+                return response.status(400).json({
+                    success: false,
+                    error: "Watcher is not in the room",
+                } as apiResponse<Watcher>);
+            }
+
+            //Charger le bucket de la room
+            await Database.transaction(async (trx) => {
+                for (const { id, note } of films) {
+                    // Récupérer le film en lockant la ligne
+                    const bucketFilm = await Database.from("buckets_rooms")
+                        .where("room_id", room.id)
+                        .where("film_id", id)
+                        .forUpdate()
+                        .useTransaction(trx)
+                        .first();
+
+                    if (!bucketFilm) continue;
+
+                    // Incrémenter poids
+                    const newWeight = bucketFilm.weight + note;
+
+                    // Mettre à jour en base
+                    await Database.from("buckets_rooms")
+                        .where("room_id", room.id)
+                        .where("film_id", id)
+                        .useTransaction(trx)
+                        .update({ weight: newWeight });
+                }
+            });
+
+            // On passe le step du watcher
+            await watcher.merge({ step: watcher.step + 1 }).save();
+
+            // On émet un événement pour mettre à jour la room
+            Ws.io.emit(`updateRoom:${code}`, "update");
+
+            return response.status(200).json({
+                success: true,
+            } as apiResponse<void>);
+        } catch (error) {
+            return response.status(500).json({
+                success: false,
+                error: "Could not vote for film",
             } as apiResponse<void>);
         }
     }
