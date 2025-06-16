@@ -15,15 +15,14 @@
 
             <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
 
-            <span class="info" @click="" v-if="userStep == 1 || userStep == 2">i</span>
+            <span class="info" @click="showInfoModal" v-if="userStep == 1 || userStep == 2">i</span>
         </div>
 
-        <SwipeView :room="room" :ready="ready" :movies="moviesBucketRoom" :userBucket="userBucket" v-if="userStep == 0" @validStep1="validStep1"/>
-        <VoteView :room="room" :ready="ready" :movies="moviesBucketRoom" v-if="userStep == 1" />
-        <!-- <ResultsView :room="room" :ready="ready" :movies="moviesBucketRoom" :updated="updated" v-if="userStep == 2" /> -->
+        <SwipeView :room="room" :ready="ready" :movies="moviesList" :userBucket="userBucket" v-if="userStep == 0" @validStep1="validStep1"/>
+        <VoteView :room="room" :movies="moviesList" v-if="userStep == 1" @validStep2="validStep2"/>
+        <ResultsView :room="room" :movies="moviesList" v-if="userStep == 2" />
 
-        <ModaleInfoMain :page="userStep" />
-
+        <ModaleInfo ref="modaleInfo" :page="2" />
     </div>
 
 </template>
@@ -36,12 +35,10 @@ import SwipeView from '@/views/SwipeView.vue';
 import VoteView from '@/views/VoteView.vue';
 import ResultsView from '@/views/ResultsView.vue';
 import CustomBtn from '@/components/Button.vue';
-import ModaleInfoMain from '@/modales/ModaleInfoMain.vue';
+import ModaleInfo from '@/modales/ModaleInfo.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, ref, watch } from "vue";
 import { showSnackbar, hideSnackbar } from '../utils/utils';
-
-
 
 import { Room } from '../../../shared-types/room';
 import { Watcher } from '../../../shared-types/watcher';
@@ -49,6 +46,8 @@ import { apiResponse } from 'shared-types/apiResponse';
 import { TMDBFilm } from '../../../shared-types/tmdb';
 
 const socket = io(process.env.VUE_APP_API_URL || "");
+
+const modaleInfo = ref<InstanceType<typeof ModaleInfo> | null>(null);
 
 const route: any = useRoute();
 const router = useRouter();
@@ -58,25 +57,26 @@ const copySymbol = ref<HTMLElement | null>(null);
 const validCopySymbol = ref<HTMLElement | null>(null);
 
 const room = ref<Room | null>(null);
-const moviesBucketRoom = ref<TMDBFilm[]>([]); // Films in the bucket of the room
+const moviesList = ref<TMDBFilm[]>([]); // Films in the bucket of the room
 const userBucket = ref<TMDBFilm[]>([]); // Films selected by the user
 const ready = ref<boolean>(false);
-const userStep = ref<number>(0); // 1: Choix des films, 2: Vote, 3: Résultats
+const userStep = ref<number>(0); // 0: Choix des films, 1: Vote, 2: Résultats
 const leftRoomClick = ref<number>(0);
 
 onMounted(async () => {
-    console.log('Mounted MainView');
     await updateRoom();
-    moviesBucketRoom.value = await getFilms();
+    moviesList.value = await getFilms();
 
     socket.on(`updateRoom:${roomCode}`, async () => {
-        console.log('Room updated by socket');
         await updateRoom();
-        moviesBucketRoom.value = await getFilms();
     });
 
     ready.value = true;
 });
+
+const showInfoModal = () => {
+	modaleInfo.value?.$el.classList.add('showModal');
+};
 
 const copyToClipboard = async () => {
     try {
@@ -129,6 +129,19 @@ const updateRoom = async () => {
 
     const foundWatcher = room.value.watchers.find((watcher: Watcher) => watcher.id == watcherId);
     userStep.value = foundWatcher ? foundWatcher.step : 0;
+
+    if ((room.value.minStep ?? 0) >= 1 && room.value.bucket) {
+        // Filter the bucket to only include active films
+        room.value.bucket = room.value.bucket.filter(film => film.is_active);
+
+        //Idem avec moviesList, ne garder que ceux dont l'id est dans le bucket
+        moviesList.value = moviesList.value.filter(film => 
+            room.value && room.value.bucket
+                ? room.value.bucket.some(bucketFilm => bucketFilm.film_id === film.id)
+                : false
+        );
+        
+    }
 };
 
 const getRoom = async (): Promise<Room> => {
@@ -165,40 +178,33 @@ const validStep1 = async () => {
         userStep.value = 1;
         await updateRoom();
     } else {
+        //TODO: Handle error
         alert('Erreur lors de l\'ajout des films au bucket');
     }
 };
 
-// const validStep2 = async (films: TMDBFilm[]) => {
-//     const data = {
-//         code: roomCode,
-//         watcher_id: sessionStorage.getItem('watcherId'),
-//         films: films.map(film => ({
-//             id: film.id,
-//             weight: film
-//         }))
-//     };
+const validStep2 = async (selectedNotes: Map<number, number>) => {
+    const data = {
+        code: roomCode,
+        watcher_id: sessionStorage.getItem('watcherId'),
+        films: Array.from(selectedNotes.entries()).map(([id, note]) => ({
+            id,
+            note
+        }))
+    };
 
-//     const response: apiResponse<any> = await get('room/voteForFilm', data);
+    const response: apiResponse<any> = await post('room/voteForFilm', data);
 
-//     if (response.success) {
-//         userStep.value = 2;
-//         await updateRoom();
-//     } else {
-//         alert('Erreur lors du vote pour les films');
-//     }
-// };
+    if (response.success) {
+        userStep.value = 2;
+        await updateRoom();
+    } else {
+        //TODO: Handle error
+        alert('Erreur lors du vote pour les films');
+    }
+};
 
-
-
-// async created() {
-//     // socket.on(`updateRoom:${this.$route.params.roomCode}`, async () => {
-//     //     await this.updateRoom();
-//     //     this.setBucketRoom();
-//     //     this.updated = !this.updated;
-//     // });
-// },
-
+//TODO remettre info
 //     displayInfo() {
 //         document.getElementById('modaleInfoMain').classList.toggle('showModal');
 //     }

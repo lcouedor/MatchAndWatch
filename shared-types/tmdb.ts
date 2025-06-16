@@ -8,6 +8,7 @@ export interface TMDBFilm {
     title: string;
     vote_average: number;
     vote_count: number;
+    genres?: { id: number; name: string }[];
 }
 
 export interface TMDBFilmDetails extends TMDBFilm {

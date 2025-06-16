@@ -1,5 +1,5 @@
 <template>
-    <div v-if="room.data.minStep != 3" class="loadingView">
+    <div v-if="room?.minStep != 2" class="loadingView">
         <p>En attente des autres participants</p>
         <div class="watchersList">
             <div v-for="watcher in watcherList" :key="watcher.id" class="watcherInWait"
@@ -13,22 +13,21 @@
     </div>
 
     <div v-else class="stepPage">
-
-        <div class="resultList" v-if="winner">
-            <div class="titre">{{ winner.title }} ({{ getYear(winner.release_date) }})</div>
-            <p class="titre">{{ }}</p>
+        <div class="resultList" v-if="getWinner">
+            <div class="titre">{{ getWinner.title }} ({{ getYear(getWinner.release_date) }})</div>
             <div class="imgContainer">
-                <img :src="`https://image.tmdb.org/t/p/w780/${winner.poster_path}`" alt="Affiche du film">
-                <img :src="`https://image.tmdb.org/t/p/w780/${winner.poster_path}`" alt="Affiche du film">
+                <img :src="`https://image.tmdb.org/t/p/w780/${getWinner.poster_path}`" alt="Affiche du film">
+                <img :src="`https://image.tmdb.org/t/p/w780/${getWinner.poster_path}`" alt="Affiche du film">
             </div>
 
             <div class="dataFilm">
-                <p class="note">{{ Math.round(winner.vote_average * 10) / 10 }}/10 ({{ winner.vote_count }} votants imdb)</p>
+                <p class="note">{{ Math.round(getWinner.vote_average * 10) / 10 }}/10 ({{ getWinner.vote_count }}
+                    votants imdb)</p>
                 <div class="genresList">
-                    <p v-for="genre in winner.genres" :key="genre.id">{{ genre.name }}</p>
+                    <p v-for="genre in getWinner.genres" :key="genre.id">{{ genre.name }}</p>
                 </div>
 
-                <div class="overviewZone">{{ winner.overview }}</div>
+                <div class="overviewZone">{{ getWinner.overview }}</div>
             </div>
 
         </div>
@@ -37,81 +36,48 @@
 
 </template>
 
-<script>
+<script setup lang="ts">
+import { ref, computed, watch } from 'vue';
+import { Room } from '../../../shared-types/room';
+import { Watcher } from '../../../shared-types/watcher';
+import { apiResponse } from 'shared-types/apiResponse';
+import { TMDBFilm } from '../../../shared-types/tmdb';
+import { BucketRoom } from 'shared-types/bucketRoom';
 
-export default {
-    name: 'ResultsView',
+const props = defineProps<{
+    room: Room | null;
+    movies: TMDBFilm[];
+}>();
 
-    data() {
-        return {
-            films: [],
-            winner: null,
-            watcherId: sessionStorage.getItem('watcherId'),
+// Données réactives
+const films = ref<TMDBFilm[]>([]);
+const winner = ref<TMDBFilm | null>(null);
+const watcherId = sessionStorage.getItem('watcherId');
+
+
+// Computed
+const watcherList = computed(() => {
+    if (!props.room || !props.room.watchers) return [];
+    return props.room.watchers.filter(watcher => watcher.id !== Number(watcherId));
+});
+
+const getWinner = computed<TMDBFilm | null>(() => {
+    if (!props.movies || props.movies.length === 0 || !props.room?.bucket) return null;
+
+    const bestBucket: BucketRoom | null = props.room.bucket.reduce((best: BucketRoom | null, current: BucketRoom) => {
+        if (!best || (current.weight ?? 0) > (best.weight ?? 0)) {
+            return current;
         }
-    },
+        return best;
+    }, null);
 
-    props: {
-        room: {
-            type: Object,
-            default: null
-        },
-        movies: {
-            type: Array,
-            default: []
-        },
-        ready: {
-            type: Boolean,
-            default: false
-        },
-        updated: {
-            type: Boolean,
-            default: false
-        }
-    },
+    if (!bestBucket) return null;
 
-    watch: {
-        updated: {
-            immediate: true,
-            async handler() {
-                if (this.room.data.minStep == 3) {
-                    //calcul du gagnant
-                    this.winner = this.calcWinner();
-                }
-            }
-        },
-    },
+    return props.movies.find(movie => movie.id === bestBucket.film_id) || null;
+});
 
-    computed: {
-        watcherList() {
-            //on retourne les watchers de la room moins soi-même
-            return this.room.data.watchers.filter(watcher => watcher.id != this.watcherId);
-        }
-    },
-
-    methods: {
-
-        calcWinner() {
-            // Je détermine le gagnant en fonction du weight de chaque film
-            // Si il y a égalité, je prends le plus voté
-            let winner = this.movies[0];
-            for (let i = 1; i < this.movies.length; i++) {
-                if (this.movies[i].weight > winner.weight) {
-                    winner = this.movies[i];
-                } else if (this.movies[i].weight == winner.weight) {
-                    if (this.movies[i].vote_count > winner.vote_count) {
-                        winner = this.movies[i];
-                    }
-                }
-            }
-            return winner;
-        },
-
-        getYear(date) {
-            return new Date(date).getFullYear();
-        },
-    }
-
-
-
-};
+function getYear(date?: string): number | null {
+    if (!date) return null;
+    return new Date(date).getFullYear();
+}
 </script>

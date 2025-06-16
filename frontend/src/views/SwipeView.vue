@@ -51,11 +51,9 @@
 
 <script setup lang="ts">
 
-import { onMounted, ref, defineProps, watch } from "vue";
+import { ref, defineProps, watch } from "vue";
 
 import { Room } from '../../../shared-types/room';
-import { Watcher } from '../../../shared-types/watcher';
-import { apiResponse } from 'shared-types/apiResponse';
 import { TMDBFilm } from '../../../shared-types/tmdb';
 
 
@@ -93,6 +91,7 @@ const getCardCenter = () =>
     card.value!.getBoundingClientRect().left + card.value!.offsetWidth / 2;
 
 const resetCard = () => {
+    if (!card.value) return;
     card.value!.style.left = '50%';
     card.value!.style.transform = 'translateX(-50%)';
     card.value!.style.transition = 'none';
@@ -164,9 +163,6 @@ const onDragEnd = () => {
     } else if (center > 3 * quarter) {
         animateCard('right', () => {
             if (currentFilm.value) props.userBucket.push(currentFilm.value);
-            if (props.userBucket.length === props.room?.bucket_size || displayFilms.value.length === 0) {
-                emit('validStep1');
-            }
             currentFilm.value = displayFilms.value.pop() || null;
         });
     } else {
@@ -174,6 +170,9 @@ const onDragEnd = () => {
         card.value!.style.transform = 'translateX(-50%)';
         card.value!.style.transition = `all 500ms, transform 500ms`;
         setTimeout(() => (card.value!.style.transition = 'none'), 500);
+    }
+    if (props.userBucket.length === props.room?.bucket_size || displayFilms.value.length === 0) {
+        emit('validStep1');
     }
 };
 </script>
