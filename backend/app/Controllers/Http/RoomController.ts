@@ -52,6 +52,7 @@ export default class RoomController {
                 .status(201)
                 .json({ success: true, data: room } as apiResponse<Room>);
         } catch (error) {
+            console.error("Error creating room:", error);
             return response.status(500).json({
                 success: false,
                 error: "Could not create room",
