@@ -43,3 +43,6 @@ Server.middleware.register([
 */
 Server.middleware.registerNamed({
 })
+
+console.log('PG_HOST:', process.env.PG_HOST)
+console.log('DB_CONNECTION:', process.env.DB_CONNECTION)
