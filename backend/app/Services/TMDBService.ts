@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
-import { TMDBDiscoverResponse, TMDBFilm, TMDBFilmDetails } from "../../../shared-types/tmdb";
+import { TMDBDiscoverResponse, TMDBFilm, TMDBFilmDetails } from "SharedTypes/tmdb";
 
 import Env from "@ioc:Adonis/Core/Env";
 
