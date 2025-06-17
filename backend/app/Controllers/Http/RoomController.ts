@@ -89,7 +89,7 @@ export default class RoomController {
             // On ajoute le watcher à la room (optionnel ici, car create l'ajoute déjà normalement)
             await room.related("watchers").save(watcher);
 
-            Ws.io.emit(`updateRoom:${code}`, {
+            Ws.io.sockets.emit(`updateRoom:${code}`, {
                 display: true,
                 message: `Le watcher ${watcher_name} a rejoint la room`,
             });
@@ -134,7 +134,7 @@ export default class RoomController {
             await watcher.delete();
 
             //On émet un événement pour mettre à jour la room
-            Ws.io.emit(`updateRoom:${code}`, {
+            Ws.io.sockets.emit(`updateRoom:${code}`, {
                 display: true,
                 message: `Le watcher ${watcher.name} a quitté la room`,
             });
@@ -287,7 +287,7 @@ export default class RoomController {
             await watcher.merge({ step }).save();
 
             // On émet un événement pour mettre à jour la room
-            Ws.io.emit(`updateRoom:${code}`, {
+            Ws.io.sockets.emit(`updateRoom:${code}`, {
                 display: false,
                 message: ""
             }
@@ -368,7 +368,7 @@ export default class RoomController {
             await watcher.merge({ step: watcher.step + 1 }).save();
 
             // On émet un événement pour mettre à jour la room
-            Ws.io.emit(`updateRoom:${code}`, {
+            Ws.io.sockets.emit(`updateRoom:${code}`, {
                 display: false,
                 message: "",
             });
