@@ -3,35 +3,36 @@ name: Déploiement frontend sur GitHub Pages
 on:
   push:
     tags:
-      - 'v*'         # déploiement automatique sur tag (ex: v1.0.0)
-  workflow_dispatch:  # permet aussi le déclenchement manuel
+      - "v*" # déploiement automatique sur tag (ex: v1.0.0)
+  workflow_dispatch: # permet aussi le déclenchement manuel
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
-    - name: Clean npm cache
-      run: npm cache clean --force
+      - name: Clean npm cache
+        run: npm cache clean --force
 
-    - name: Install dependencies
-      working-directory: frontend
-      run: npm install --registry=https://registry.npmjs.org
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install --registry=https://registry.npmjs.org
 
-    - name: Build frontend
-      working-directory: frontend
-      run: npm run build
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
 
-    - name: Deploy to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./frontend/dist
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
+          clean: true
