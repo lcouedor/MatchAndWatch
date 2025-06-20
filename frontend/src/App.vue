@@ -1,6 +1,6 @@
 <template>
-  <div id="mainApp">
-    <div>Test affichage fixe</div>
+  <div id="app">
+    <router-view />
     <Snackbar />
   </div>
 </template>
