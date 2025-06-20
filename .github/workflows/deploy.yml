@@ -1,4 +1,4 @@
-name: Deploy Frontend to GitHub Pages
+name: Déploiement frontend sur GitHub Pages
 
 on:
   push:
@@ -19,9 +19,12 @@ jobs:
       with:
         node-version: '18'
 
+    - name: Clean npm cache
+      run: npm cache clean --force
+
     - name: Install dependencies
       working-directory: frontend
-      run: npm install
+      run: npm install --registry=https://registry.npmjs.org
 
     - name: Build frontend
       working-directory: frontend
