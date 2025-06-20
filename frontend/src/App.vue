@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="mainApp">
     <!-- <router-view />
     <Snackbar /> -->
     testtt
