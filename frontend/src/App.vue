@@ -1,8 +1,7 @@
 <template>
   <div id="mainApp">
-    <!-- <router-view />
-    <Snackbar /> -->
-    testtt
+    <router-view />
+    <Snackbar />
   </div>
 </template>
 
