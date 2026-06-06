@@ -1,7 +1,10 @@
 import { BaseModel, column, hasMany, HasMany } from "@ioc:Adonis/Lucid/Orm";
 import Watcher from "App/Models/Watcher";
 import BucketRoom from "App/Models/BucketRoom";
+import FilterVote from "App/Models/FilterVote";
 import { DateTime } from "luxon";
+import type { Filters } from "SharedTypes/filters";
+import type { FilterMode } from "SharedTypes/room";
 
 export default class Room extends BaseModel {
     public static table = "rooms";
@@ -14,6 +17,18 @@ export default class Room extends BaseModel {
 
     @column()
     public bucket_size: number;
+
+    @column()
+    public filter_mode: FilterMode;
+
+    @column({
+      prepare: (value: Filters | null) => value ? JSON.stringify(value) : null,
+      consume: (value: string | null) => value ? JSON.parse(value) : null,
+    })
+    public filters: Filters | null;
+
+    @column()
+    public step_timeout: number | null;
 
     @column.dateTime({ autoCreate: true })
     public createdAt: DateTime;
@@ -32,6 +47,12 @@ export default class Room extends BaseModel {
         localKey: "id",
     })
     public bucket: HasMany<typeof BucketRoom>;
+
+    @hasMany(() => FilterVote, {
+        foreignKey: "room_id",
+        localKey: "id",
+    })
+    public filterVotes: HasMany<typeof FilterVote>;
 
 
 

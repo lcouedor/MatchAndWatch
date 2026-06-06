@@ -1,6 +1,6 @@
 <template>
 
-	<h1>Match & Watch</h1>
+	<router-link to="/" class="homeLink"><h1>Match & Watch</h1></router-link>
 
 	<div class="buttonsHome">
 		<Button @click="showModal('modaleCreateRoom')">Créer une room</Button>

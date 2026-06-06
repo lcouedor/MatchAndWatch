@@ -1,14 +1,13 @@
 <template>
-    <!-- TODO retirer les id si possible -->
     <ModalSlug modaleId="modaleCreateRoom" ref="modaleCreateRoom">
         <h1>Créer une Room</h1>
 
         <div class="inputBloc">
-            <label>Plutôt sélection du film avec finesse, ou passer au plus vite au visionnage ?</label>
+            <label>Format de session</label>
             <select v-model="selectedBucketSize">
-                <option v-for="bucketSizeOption in bucketSizeOptions" :key="bucketSizeOption.value"
-                    :value="bucketSizeOption.value" :selected="bucketSizeOption.default">
-                    {{ bucketSizeOption.name }} - {{ bucketSizeOption.description }}
+                <option v-for="option in bucketSizeOptions" :key="option.value"
+                    :value="option.value" :selected="option.default">
+                    {{ option.name }} - {{ option.description }}
                 </option>
             </select>
         </div>
@@ -19,7 +18,102 @@
             <p class="errorMessage">{{ errorName }}</p>
         </div>
 
-        <Spinner v-if="waiting">
+        <!-- Mode filtres (standard / odyssey uniquement) -->
+        <div class="inputBloc" v-if="selectedBucketSize > 3">
+            <label>Choix des filtres</label>
+            <select v-model="filterMode">
+                <option value="creator">Je choisis les filtres</option>
+                <option value="vote">Tout le monde vote pour les filtres</option>
+            </select>
+        </div>
+
+        <!-- Timeout par étape -->
+        <div class="inputBloc">
+            <label>Temps max par étape</label>
+            <select v-model="stepTimeoutOption">
+                <option value="0">Illimité</option>
+                <option value="60">1 min</option>
+                <option value="120">2 min</option>
+                <option value="180">3 min</option>
+                <option value="300">5 min</option>
+                <option value="600">10 min</option>
+            </select>
+            <p class="hint" v-if="estimatedTime">⏱ Durée estimée : {{ estimatedTime }}</p>
+        </div>
+
+        <!-- Filtres (mode créateur uniquement) -->
+        <div class="filtersSection" v-if="filterMode === 'creator'">
+            <p class="sectionTitle">Filtres</p>
+
+            <div class="filterRow">
+                <div class="filterLabel">
+                    <span>Note</span>
+                    <span class="filterValue">{{ filters.vote_average_min }} — {{ filters.vote_average_max }}</span>
+                </div>
+                <DualRangeSlider
+                    :min="0" :max="10" :step="0.5"
+                    v-model:minValue="filters.vote_average_min"
+                    v-model:maxValue="filters.vote_average_max"
+                />
+            </div>
+
+            <div class="filterRow">
+                <div class="filterLabel">
+                    <span>Année de sortie</span>
+                    <span class="filterValue">{{ filters.release_year_min }} — {{ filters.release_year_max }}</span>
+                </div>
+                <DualRangeSlider
+                    :min="1950" :max="currentYear" :step="1"
+                    v-model:minValue="filters.release_year_min"
+                    v-model:maxValue="filters.release_year_max"
+                />
+            </div>
+
+            <div class="filterRow">
+                <div class="filterLabel">
+                    <span>Popularité</span>
+                    <span class="filterValue">
+                        {{ popularityLabel(filters.vote_count_min) }} — {{ popularityLabel(voteCountMax) }}
+                    </span>
+                </div>
+                <DualRangeSlider
+                    :min="0" :max="VOTE_COUNT_MAX" :step="500"
+                    v-model:minValue="filters.vote_count_min"
+                    v-model:maxValue="voteCountMax"
+                />
+            </div>
+
+            <div class="filterRow">
+                <div class="filterLabel">
+                    <span>Durée</span>
+                    <span class="filterValue">{{ runtimeLabel }}</span>
+                </div>
+                <DualRangeSlider
+                    :min="0" :max="RUNTIME_MAX" :step="5"
+                    v-model:minValue="runtimeMinValue"
+                    v-model:maxValue="runtimeMaxValue"
+                />
+            </div>
+
+            <div class="filterRow">
+                <div class="filterLabel">
+                    <span>Genres</span>
+                    <span class="filterHint">{{ filters.genres.length === 0 ? 'tous' : filters.genres.length + ' sélectionné(s)' }}</span>
+                </div>
+                <div class="genreGrid">
+                    <button
+                        v-for="genre in TMDB_GENRES"
+                        :key="genre.id"
+                        class="genreChip"
+                        :class="{ selected: filters.genres.includes(genre.id) }"
+                        @click="toggleGenre(genre.id)"
+                        type="button"
+                    >{{ genre.name }}</button>
+                </div>
+            </div>
+        </div>
+
+        <Spinner v-if="waiting" style="margin-top: 20px;">
             On recherche les meilleurs films pour toi
         </Spinner>
 
@@ -31,18 +125,21 @@
 
 <script setup lang="ts">
 import Button from "@/components/Button.vue";
+import DualRangeSlider from "@/components/DualRangeSlider.vue";
 import { post } from "../api/services";
 import ModalSlug from "./ModalSlug.vue";
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
 import Spinner from "@/components/Spinner.vue";
 import { useRouter } from 'vue-router'
 import { uppercaseChar } from "../utils/utils";
 import { Room } from "shared-types/room";
 import { Watcher } from "shared-types/watcher";
 import { apiResponse } from "shared-types/apiResponse";
-
+import { Filters, TMDB_GENRES, DEFAULT_FILTERS } from "shared-types/filters";
+import type { FilterMode } from "shared-types/room";
 
 const router = useRouter()
+const currentYear = new Date().getFullYear()
 
 interface BucketSizeOption {
     name: string;
@@ -51,64 +148,213 @@ interface BucketSizeOption {
     default: boolean;
 }
 
-const bucketSizeOptions: BucketSizeOption[] = [{ name: "Blitz", value: 3, description: "Pour les pressés", default: false },
-{ name: "Standard", value: 5, description: "Pour les indécis", default: true },
-{ name: "Odyssey", value: 10, description: "Pour les amoureux du ciné", default: false }];
+const bucketSizeOptions: BucketSizeOption[] = [
+    { name: "Blitz", value: 3, description: "Pour les pressés", default: false },
+    { name: "Standard", value: 5, description: "Pour les indécis", default: true },
+    { name: "Odyssey", value: 10, description: "Pour les amoureux du ciné", default: false },
+]
 
-const selectedBucketSize = ref<number>(bucketSizeOptions.find(option => option.default)?.value || 5);
-const inputNomWatcher = ref<string>("");
-const errorName = ref<string>("");
-const modaleCreateRoom = ref<InstanceType<typeof ModalSlug> | null>(null);
-
+const selectedBucketSize = ref<number>(bucketSizeOptions.find(o => o.default)?.value || 5)
+const inputNomWatcher = ref<string>("")
+const errorName = ref<string>("")
+const modaleCreateRoom = ref<InstanceType<typeof ModalSlug> | null>(null)
 const waiting = ref<boolean>(false)
+const filterMode = ref<FilterMode>('creator')
+const stepTimeoutOption = ref<string>("0")
+const filters = ref<Filters>({ ...DEFAULT_FILTERS })
+
+const VOTE_COUNT_MAX = 50000
+const RUNTIME_MAX = 180
+const voteCountMax = ref(filters.value.vote_count_max ?? VOTE_COUNT_MAX)
+const runtimeMinValue = ref(filters.value.runtime_min ?? 0)
+const runtimeMaxValue = ref(filters.value.runtime_max ?? RUNTIME_MAX)
+
+watch(voteCountMax, (v) => {
+    filters.value.vote_count_max = v >= VOTE_COUNT_MAX ? null : v
+})
+watch(runtimeMinValue, (v) => {
+    filters.value.runtime_min = v === 0 ? null : v
+})
+watch(runtimeMaxValue, (v) => {
+    filters.value.runtime_max = v >= RUNTIME_MAX ? null : v
+})
+
+const formatRuntime = (v: number): string => {
+    if (v === 0) return '0'
+    const h = Math.floor(v / 60)
+    const m = v % 60
+    return h > 0 ? (m > 0 ? `${h}h ${m}min` : `${h}h`) : `${m}min`
+}
+const runtimeLabel = computed(() => {
+    const lo = formatRuntime(runtimeMinValue.value)
+    const hi = runtimeMaxValue.value >= RUNTIME_MAX ? '∞' : formatRuntime(runtimeMaxValue.value)
+    return `${lo} — ${hi}`
+})
+
+const popularityLabel = (n: number): string => {
+    if (n >= VOTE_COUNT_MAX) return '∞'
+    if (n >= 30000) return 'Blockbuster'
+    if (n >= 10000) return 'Populaire'
+    if (n >= 3000) return 'Grand public'
+    if (n >= 1000) return 'Indépendant'
+    if (n > 0) return 'Confidentiel'
+    return 'Tous'
+}
+
+watch(selectedBucketSize, (val) => {
+    if (val <= 3) filterMode.value = 'creator'
+})
+
+const stepTimeout = computed<number | null>(() => {
+    const v = parseInt(stepTimeoutOption.value)
+    return v > 0 ? v : null
+})
+
+const estimatedTime = computed<string | null>(() => {
+    if (!stepTimeout.value) return null
+    const steps = filterMode.value === 'vote' && selectedBucketSize.value > 3 ? 3 : 2
+    const totalSecs = steps * stepTimeout.value
+    const mins = Math.floor(totalSecs / 60)
+    const secs = totalSecs % 60
+    return secs > 0 ? `${mins}m${secs}s` : `${mins}m`
+})
 
 const handleInputNom = () => {
-    uppercaseChar(inputNomWatcher);
+    uppercaseChar(inputNomWatcher)
+}
+
+const toggleGenre = (id: number) => {
+    const idx = filters.value.genres.indexOf(id)
+    if (idx >= 0) filters.value.genres.splice(idx, 1)
+    else filters.value.genres.push(id)
 }
 
 const createRoom = async () => {
-    errorName.value = ""; // Reset des erreurs
+    errorName.value = ""
 
     if (!inputNomWatcher.value) {
-        errorName.value = "Hop là, pas si vite, il me faut ton nom !";
-        return;
+        errorName.value = "Hop là, pas si vite, il me faut ton nom !"
+        return
     }
 
-    waiting.value = true; // Affichage du spinner
+    waiting.value = true
 
-    const data = {
+    const room: apiResponse<Room> = await post<Room>("room", {
         bucket_size: selectedBucketSize.value,
-    };
+        filter_mode: filterMode.value,
+        filters: filterMode.value === 'creator' ? filters.value : undefined,
+        step_timeout: stepTimeout.value,
+    })
 
-    const room: apiResponse<Room> | null = await post<Room>("room", data);
+    if (!room?.success || !room?.data?.code) {
+        waiting.value = false
+        errorName.value = room?.error || "Erreur lors de la création de la room"
+        return
+    }
 
-    // On ajoute ensuite le joueur à la room
-    const watcherData = {
-        code: room?.data?.code,
+    const watcher: apiResponse<Watcher> = await post<Watcher>("room/join", {
+        code: room.data.code,
         watcher_name: inputNomWatcher.value,
-    };
+    })
 
-    const watcher: apiResponse<Watcher> | null = await post<Watcher>("room/join", watcherData);
+    modaleCreateRoom.value?.dismissModal()
+    inputNomWatcher.value = ""
+    waiting.value = false
 
-    // On cache la modale
-    modaleCreateRoom.value?.dismissModal();
-
-    inputNomWatcher.value = "";
-    waiting.value = false;
-
-    // On enregistre l'id watcher dans le local storage
-    sessionStorage.setItem("watcherId", (watcher.data?.id)?.toString() ?? "");
-
-    // On redirige vers la room
-    router.push("/match/" + room?.data?.code);
-};
+    sessionStorage.setItem("watcherId", (watcher.data?.id)?.toString() ?? "")
+    router.push("/match/" + room.data.code)
+}
 
 defineExpose({
-    showModal() {
-        modaleCreateRoom.value?.showModal();
-    },
-    dismissModal() {
-        modaleCreateRoom.value?.dismissModal();
-    }
+    showModal() { modaleCreateRoom.value?.showModal() },
+    dismissModal() { modaleCreateRoom.value?.dismissModal() },
 })
 </script>
+
+<style lang="scss" scoped>
+@use '../assets/style/variables' as *;
+
+.filtersSection {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 4px;
+}
+
+.sectionTitle {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $primaryColor;
+    border-bottom: 1px solid rgba(118, 86, 245, 0.3);
+    padding-bottom: 8px;
+}
+
+.filterRow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filterLabel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: $textColorPrimary;
+}
+
+.filterValue {
+    color: $primaryColor;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.filterUnit {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: rgba(118, 86, 245, 0.7);
+    margin-left: 2px;
+}
+
+.filterHint {
+    color: rgba(224, 224, 224, 0.45);
+    font-size: 0.8rem;
+}
+
+.genreGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.genreChip {
+    padding: 5px 14px;
+    border-radius: $stdRadius;
+    border: 1.5px solid rgba(118, 86, 245, 0.3);
+    background: transparent;
+    color: rgba(224, 224, 224, 0.65);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.18s;
+
+    &.selected {
+        border-color: $primaryColor;
+        background: rgba(118, 86, 245, 0.2);
+        color: $textColorPrimary;
+    }
+}
+
+.hint {
+    font-size: 0.8rem;
+    opacity: 0.5;
+    margin: 2px 0 0;
+}
+</style>

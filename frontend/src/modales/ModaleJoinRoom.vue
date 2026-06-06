@@ -86,7 +86,7 @@ const joinRoom = async () => {
     };
     let watcher: apiResponse<Watcher> | null = await post<Watcher>('room/join/', data);
     if (!watcher.success) {
-        errors.value.code = 'Hum, ce code ne semble pas valide...';
+        errors.value.code = watcher.error || 'Hum, ce code ne semble pas valide...';
         inputRoomCode.value?.classList.add('errorInput');
         return;
     }

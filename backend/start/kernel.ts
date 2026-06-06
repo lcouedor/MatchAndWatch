@@ -22,7 +22,6 @@ import Server from '@ioc:Adonis/Core/Server'
 */
 Server.middleware.register([
   () => import('@ioc:Adonis/Core/BodyParser'),
-  () => import('App/Middleware/Cors'),         // Notre middleware CORS personnalisé
 ])
 
 /*
@@ -44,5 +43,3 @@ Server.middleware.register([
 Server.middleware.registerNamed({
 })
 
-console.log('PG_HOST:', process.env.PG_HOST)
-console.log('DB_CONNECTION:', process.env.DB_CONNECTION)

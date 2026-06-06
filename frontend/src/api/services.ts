@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { apiResponse } from "../../../shared-types/apiResponse";
+import { apiResponse } from "shared-types/apiResponse";
 
 // export const apiURL = "https://matchandwatch.fun:3333";
 // export const apiURL = process.env.VUE_APP_API_URL;
@@ -30,14 +30,14 @@ export async function post<T = any>(path: string, data: any): Promise<apiRespons
         return response;
     } catch (error: any) {
         if (error.response) {
-            // Le backend a renvoyé une réponse avec un code d'erreur
-            return { success: false, data: error.response.data.error };
+            console.error('[post] HTTP error', error.response.status, error.response.data);
+            return { success: false, error: error.response.data?.error || JSON.stringify(error.response.data) };
         } else if (error.request) {
-            console.error("Aucune réponse du serveur. Veuillez réessayer plus tard.");
+            console.error('[post] No response received:', error.message);
         } else {
-            console.error("Erreur lors de la requête:", error.message);
+            console.error('[post] Request error:', error.message);
         }
-        return { success: false, error: error.message }; // Retourne une erreur générique
+        return { success: false, error: error.message };
     }
 }
 

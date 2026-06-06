@@ -15,16 +15,55 @@
 
             <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
 
-            <span class="info" @click="showInfoModal" v-if="userStep in [0,1]">i</span>
+            <span class="info" @click="showInfoModal" v-if="isFilterVoteStep || userStep in [0,1]">i</span>
         </div>
 
-        <SwipeView :room="room" :ready="ready" :movies="moviesList" :userBucket="userBucket" v-if="userStep == 0" @validStep1="validStep1"/>
-        <VoteView :room="room" :movies="moviesList" v-if="userStep == 1" @validStep2="validStep2"/>
-        <ResultsView :room="room" :movies="moviesList" v-if="userStep == 2" />
+        <Transition name="scene" mode="out-in">
+            <!-- Étape vote des filtres -->
+            <FilterVotingStep
+                v-if="isFilterVoteStep && room && watcherId"
+                key="filter-vote"
+                :room="room"
+                :watcherId="watcherId"
+                :externalVotesCount="filterVoteCount"
+                @filtersLocked="onFiltersLocked"
+            />
 
-        <ModaleInfo ref="modaleInfo" :page="userStep" />
+            <!-- Résumé des filtres -->
+            <FilterSummaryScreen
+                v-else-if="isFilterSummaryStep && room"
+                key="filter-summary"
+                :room="room"
+                :filmsReady="moviesList.length > 0"
+                @continue="filterSummaryDismissed = true"
+            />
+
+            <!-- Swipe -->
+            <SwipeView
+                v-else-if="userStep === 0"
+                key="swipe"
+                :room="room" :ready="ready" :movies="moviesList" :userBucket="userBucket"
+                @validStep1="validStep1"
+            />
+
+            <!-- Vote -->
+            <VoteView
+                v-else-if="userStep === 1"
+                key="vote"
+                :room="room" :movies="moviesList"
+                @validStep2="validStep2"
+            />
+
+            <!-- Résultats -->
+            <ResultsView
+                v-else
+                key="results"
+                :room="room" :movies="moviesList"
+            />
+        </Transition>
+
+        <ModaleInfo ref="modaleInfo" :page="isFilterVoteStep ? -2 : userStep" :step-timeout="room?.step_timeout ?? null" />
     </div>
-
 </template>
 
 <script setup lang="ts">
@@ -34,16 +73,17 @@ import { get, del, post } from '../api/services';
 import SwipeView from '@/views/SwipeView.vue';
 import VoteView from '@/views/VoteView.vue';
 import ResultsView from '@/views/ResultsView.vue';
-import CustomBtn from '@/components/Button.vue';
 import ModaleInfo from '@/modales/ModaleInfo.vue'
+import FilterVotingStep from '@/components/FilterVotingStep.vue'
+import FilterSummaryScreen from '@/components/FilterSummaryScreen.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, computed } from "vue";
 import { triggerSnackbar, hideSnackbar } from '../utils/utils';
 
-import { Room } from '../../../shared-types/room';
-import { Watcher } from '../../../shared-types/watcher';
+import { Room } from 'shared-types/room';
+import { Watcher } from 'shared-types/watcher';
 import { apiResponse } from 'shared-types/apiResponse';
-import { TMDBFilm } from '../../../shared-types/tmdb';
+import { TMDBFilm } from 'shared-types/tmdb';
 
 const socket = io(process.env.VUE_APP_API_URL || "");
 
@@ -57,41 +97,88 @@ const copySymbol = ref<HTMLElement | null>(null);
 const validCopySymbol = ref<HTMLElement | null>(null);
 
 const room = ref<Room | null>(null);
-const moviesList = ref<TMDBFilm[]>([]); // Films in the bucket of the room
-const userBucket = ref<TMDBFilm[]>([]); // Films selected by the user
+const moviesList = ref<TMDBFilm[]>([]);
+const userBucket = ref<TMDBFilm[]>([]);
 const ready = ref<boolean>(false);
-const userStep = ref<number>(0); // 0: Choix des films, 1: Vote, 2: Résultats
+const userStep = ref<number>(0);
 const leftRoomClick = ref<number>(0);
+const watcherId = ref<number | null>(null);
+const filterVoteCount = ref<number>(0);
+const filterSummaryDismissed = ref<boolean>(false);
 let snackbarId: number | null = null;
+
+// Vrai si on est en mode vote de filtres et que les filtres ne sont pas encore définis
+const isFilterVoteStep = computed(() =>
+    room.value?.filter_mode === 'vote' && room.value?.filters === null
+)
+
+// Vrai juste après que les filtres ont été verrouillés : affiche le résumé avant le swipe
+const isFilterSummaryStep = computed(() =>
+    room.value?.filter_mode === 'vote' &&
+    room.value?.filters !== null &&
+    userStep.value === 0 &&
+    !filterSummaryDismissed.value
+)
+
 
 onMounted(async () => {
     await updateRoom();
-    moviesList.value = await getFilms();
 
-    socket.on(`updateRoom:${roomCode}`, async (message: {display: boolean, message: string}) => {
-        if(message.display){
+    if (!isFilterVoteStep.value) {
+        moviesList.value = await getFilms();
+    }
+
+    socket.on(`updateRoom:${roomCode}`, async (message: {display: boolean, message: string, filterVoteCount?: number}) => {
+        if (message.display) {
             triggerSnackbar(message.message, 3000);
         }
+        if (message.filterVoteCount !== undefined) {
+            filterVoteCount.value = message.filterVoteCount;
+        }
         await updateRoom();
+
+        if (!isFilterVoteStep.value && moviesList.value.length === 0) {
+            moviesList.value = await getFilms();
+        }
     });
 
     ready.value = true;
 });
 
+const onFiltersLocked = async () => {
+    await updateRoom();
+    moviesList.value = await getFilms();
+};
+
 const showInfoModal = () => {
-	modaleInfo.value?.$el.classList.add('showModal');
+    modaleInfo.value?.$el.classList.add('showModal');
 };
 
 const copyToClipboard = async () => {
-    try {
-        await navigator.clipboard.writeText(roomCode);
+    const showSuccess = () => {
         copySymbol.value?.classList.remove('symbolVisible');
         validCopySymbol.value?.classList.add('symbolVisible');
         setTimeout(() => {
             copySymbol.value?.classList.add('symbolVisible');
             validCopySymbol.value?.classList.remove('symbolVisible');
         }, 1000);
-    } catch (err) {
+    };
+
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(roomCode);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = roomCode;
+            ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+        }
+        showSuccess();
+    } catch {
         alert('Impossible de copier le code de la room');
     }
 };
@@ -100,18 +187,14 @@ const leftRoom = async () => {
     if (leftRoomClick.value == 0) {
         leftRoomClick.value++;
         snackbarId = triggerSnackbar('Appuyez à nouveau pour quitter', 20000)
-        setTimeout(() => {
-            leftRoomClick.value = 0;
-        }, 20000);
+        setTimeout(() => { leftRoomClick.value = 0; }, 20000);
     } else {
         hideSnackbar(snackbarId || 0);
-        const data = {
+        await del('room/leave', {
             code: roomCode,
-            watcher_id: sessionStorage.getItem('watcherId')
-        };
-        await del('room/leave', data);
+            watcher_id: sessionStorage.getItem('watcherId'),
+        });
         sessionStorage.removeItem('watcherId');
-        // Redirect to home
         router.push({ name: 'home' });
     }
 };
@@ -123,92 +206,104 @@ onUnmounted(() => {
 const updateRoom = async () => {
     room.value = await getRoom();
 
-    // Check if watcher is in the room, otherwise redirect
-    const watcherId: number | null = parseInt(sessionStorage.getItem('watcherId') || '');
-
+    const id = parseInt(sessionStorage.getItem('watcherId') || '');
     if (
-        !watcherId ||
+        !id ||
         !room.value?.watchers ||
-        !room.value.watchers.find((watcher: Watcher) => watcher.id == watcherId)
+        !room.value.watchers.find((w: Watcher) => w.id == id)
     ) {
         router.push({ name: 'home', query: { code: roomCode } });
         return;
     }
 
-    const foundWatcher = room.value.watchers.find((watcher: Watcher) => watcher.id == watcherId);
+    watcherId.value = id;
+    const foundWatcher = room.value.watchers.find((w: Watcher) => w.id == id);
     userStep.value = foundWatcher ? foundWatcher.step : 0;
 
     if ((room.value.minStep ?? 0) >= 1 && room.value.bucket) {
-        // Filter the bucket to only include active films
         room.value.bucket = room.value.bucket.filter(film => film.is_active);
-
-        //Idem avec moviesList, ne garder que ceux dont l'id est dans le bucket
-        moviesList.value = moviesList.value.filter(film => 
-            room.value && room.value.bucket
-                ? room.value.bucket.some(bucketFilm => bucketFilm.film_id === film.id)
-                : false
+        moviesList.value = moviesList.value.filter(film =>
+            room.value?.bucket?.some(b => b.film_id === film.id) ?? false
         );
-        
     }
 };
 
 const getRoom = async (): Promise<Room> => {
     const roomData: apiResponse<Room> = await get<Room>(`room/${roomCode}`, {});
-
     if (roomData.success === false) {
         router.push({ name: 'home' });
-        return {} as Room; // Return an empty Room object
+        return {} as Room;
     }
-
     return roomData.data as Room;
 };
 
-const getFilms = async (): Promise<any[]> => {
-    if (!room.value?.bucket) {
-        return [];
-    }
+const getFilms = async (): Promise<TMDBFilm[]> => {
+    if (!room.value?.bucket) return [];
     return await Promise.all(room.value.bucket.map(async (film) => {
-        const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, {movieId: film.film_id});
-        return response.data;
+        const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, { movieId: film.film_id });
+        return response.data as TMDBFilm;
     }));
 };
 
 const validStep1 = async () => {
-    const data = {
+    const response: apiResponse<any> = await post('room/addFilmBucket', {
         code: roomCode,
         watcher_id: sessionStorage.getItem('watcherId'),
         step: 1,
-        filmIds: userBucket.value.map(film => film.id)
-    };
-
-    const response: apiResponse<any> = await post('room/addFilmBucket', data);
+        filmIds: userBucket.value.map(film => film.id),
+    });
     if (response.success) {
         userStep.value = 1;
         await updateRoom();
     } else {
-        //TODO: Handle error
         alert('Erreur lors de l\'ajout des films au bucket');
     }
 };
 
 const validStep2 = async (selectedNotes: Map<number, number>) => {
-    const data = {
+    const response: apiResponse<any> = await post('room/voteForFilm', {
         code: roomCode,
         watcher_id: sessionStorage.getItem('watcherId'),
-        films: Array.from(selectedNotes.entries()).map(([id, note]) => ({
-            id,
-            note
-        }))
-    };
-
-    const response: apiResponse<any> = await post('room/voteForFilm', data);
-
+        films: Array.from(selectedNotes.entries()).map(([id, note]) => ({ id, note })),
+    });
     if (response.success) {
         userStep.value = 2;
         await updateRoom();
     } else {
-        //TODO: Handle error
         alert('Erreur lors du vote pour les films');
     }
 };
 </script>
+
+<style>
+/* Transition standard entre scènes */
+.scene-enter-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.scene-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.scene-enter-from {
+    opacity: 0;
+    transform: translateY(12px);
+}
+.scene-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+/* Transition spéciale vers les résultats */
+.scene-results-enter-active {
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.scene-results-leave-active {
+    transition: opacity 0.2s ease;
+}
+.scene-results-enter-from {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+}
+.scene-results-leave-to {
+    opacity: 0;
+}
+</style>

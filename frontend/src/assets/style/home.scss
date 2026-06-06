@@ -1,5 +1,10 @@
 @use 'variables' as *;
 
+.homeLink {
+    text-decoration: none;
+    display: block;
+}
+
 h1{
     width: 100vw;
     height: 10vh;

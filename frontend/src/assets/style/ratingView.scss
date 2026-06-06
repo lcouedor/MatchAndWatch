@@ -1,116 +1,242 @@
 @use 'variables' as *;
 
-.listFilmsToRate{
+.listFilmsToRate {
     display: flex;
     flex-direction: column;
+    gap: 0;
+    padding: 2vh 0 2vh;
+}
 
-    &>div{
-        margin-bottom: 4vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.cardFilmContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 2vh 2vh 3vh;
+    border-bottom: 1px solid rgba(118, 86, 245, 0.12);
 
-    .cardImg:hover{
-        transform: rotateY(180deg);
-    }
-
-    .cardImg{
-        position: relative;
-        width: 60vw;
-        height: 40dvh;
-        margin-bottom: 1vh;
-        margin-top: 1vh;
-        background-color: #948d9b6d;
-
-        transition: transform 0.5s;
-        transform-style: preserve-3d;
-
-        img{
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            height: 40dvh;
-            backface-visibility: hidden;
-
-            &:nth-child(1){
-                filter: blur(20px);
-            }
-        }
-
-        .overviewCardZone{
-            transform: rotateY(180deg);
-            backface-visibility: hidden;
-            height: 40dvh;
-            padding: 2vh;
-            overflow-y: auto;
-            background-color: rgba(0, 0, 0);
-            color: $textColorPrimary;
-            font-size: $textFontSizes;
-            text-align: justify;
-
-        }
+    &:last-of-type {
+        border-bottom: none;
     }
 }
 
-.ratingBoxes{
-    width: 100vw;
+.filmTitle {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: $textColorPrimary;
+    text-align: center;
+    width: 100%;
+}
+
+// Cover cliquable pour le synopsis
+.coverWrapper {
+    position: relative;
+    width: 58vw;
+    cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+    .coverImg {
+        width: 100%;
+        display: block;
+        border-radius: 12px;
+    }
+
+    .synopsisHint {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 28px 12px 10px;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.72));
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.72rem;
+        text-align: center;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+}
+
+// Boutons de vote emojis
+.ratingRow {
     display: flex;
     flex-direction: row;
+    gap: 8px;
     justify-content: center;
     align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    padding: 0 1vh;
+    box-sizing: border-box;
+}
 
-    &>div{
-        border-radius: 50px;
-        border: 2px solid grey;
-        height: 4vh;
-        width: 4vh;
-        margin-left: 1vh;
-        margin-right: 1vh;
+.ratingBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 0;
+    flex: 1;
+    border-radius: 12px;
+    border: 1.5px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    cursor: pointer;
+    transition: all 0.15s ease;
 
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: transparent;
-        font-size: $textFontSizes;
+    .ratingEmoji {
+        font-size: 1.25rem;
+        line-height: 1;
     }
 
-    div:nth-child(1), div:nth-child(5){
-        width: 6vh;
-        height: 6vh;
+    .ratingLabel {
+        font-size: 0.6rem;
+        color: rgba(224, 224, 224, 0.4);
+        white-space: nowrap;
+        letter-spacing: 0.02em;
     }
 
-    div:nth-child(2), div:nth-child(4){
-        width: 5vh;
-        height: 5vh;
-    }
-
-    div:nth-child(3){
-        width: 4vh;
-        height: 4vh;
-        &.boxSelected{
-            background-color: grey;
+    &.tier0 {
+        &.selected {
+            background: rgba(220, 50, 50, 0.18);
+            border-color: rgba(220, 50, 50, 0.6);
+            .ratingLabel { color: rgb(220, 100, 100); }
         }
     }
 
-    div:nth-child(1), div:nth-child(2){
-        border-color: $secondaryColor;
-        &.boxSelected{
-            background-color: $secondaryColor;
+    &.tier1 {
+        &.selected {
+            background: rgba(220, 120, 50, 0.18);
+            border-color: rgba(220, 120, 50, 0.6);
+            .ratingLabel { color: rgb(220, 140, 80); }
         }
     }
 
-    div:nth-child(4), div:nth-child(5){
-        border-color: $accentColor;
-        &.boxSelected{
-            background-color: $accentColor;
+    &.tier2 {
+        &.selected {
+            background: rgba(160, 160, 160, 0.18);
+            border-color: rgba(160, 160, 160, 0.5);
+            .ratingLabel { color: rgba(224, 224, 224, 0.8); }
+        }
+    }
+
+    &.tier3 {
+        &.selected {
+            background: rgba(255, 138, 22, 0.15);
+            border-color: rgba(255, 138, 22, 0.6);
+            .ratingLabel { color: $accentColor; }
+        }
+    }
+
+    &.tier4 {
+        &.selected {
+            background: rgba(118, 86, 245, 0.2);
+            border-color: $primaryColor;
+            .ratingLabel { color: $primaryColor; }
         }
     }
 }
 
-.buttonsContainer{
-    .normalButton{
+.buttonsContainer {
+    display: flex;
+    justify-content: center;
+    padding: 2vh 0 1vh;
+
+    .normalButton {
         font-size: $textFontSizes;
-        width: 30%;
+        width: 50%;
+    }
+}
+
+// ── Synopsis bottom sheet ─────────────────────────────────────────────────────
+
+.synopsisOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: flex-end;
+}
+
+.synopsisSheet {
+    width: 100%;
+    background: #272727;
+    border-radius: 20px 20px 0 0;
+    padding: 12px 20px 40px;
+    max-height: 70dvh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.sheetHandle {
+    width: 40px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 2px;
+    margin: 0 auto 2px;
+    flex-shrink: 0;
+}
+
+.sheetHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.sheetTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: $textColorPrimary;
+    flex: 1;
+    line-height: 1.4;
+}
+
+.sheetClose {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.sheetBody {
+    font-size: 0.9rem;
+    color: rgba(224, 224, 224, 0.7);
+    line-height: 1.65;
+    margin: 0;
+}
+
+// Transitions
+.synopsis-sheet-enter-active {
+    transition: opacity 0.25s ease;
+
+    .synopsisSheet {
+        transition: transform 0.25s ease;
+    }
+}
+
+.synopsis-sheet-leave-active {
+    transition: opacity 0.2s ease;
+
+    .synopsisSheet {
+        transition: transform 0.2s ease;
+    }
+}
+
+.synopsis-sheet-enter-from,
+.synopsis-sheet-leave-to {
+    opacity: 0;
+
+    .synopsisSheet {
+        transform: translateY(100%);
     }
 }
