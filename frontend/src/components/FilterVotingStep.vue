@@ -45,14 +45,12 @@
             <div class="filterRow">
                 <div class="filterLabel">
                     <span>Popularité</span>
-                    <span class="filterValue">
-                        {{ popularityLabel(localFilters.vote_count_min) }} — {{ popularityLabel(voteCountMax) }}
-                    </span>
+                    <span class="filterValue">{{ POPULARITY_LABELS[popularityMinIdx] }} — {{ POPULARITY_LABELS[popularityMaxIdx] }}</span>
                 </div>
                 <DualRangeSlider
-                    :min="0" :max="VOTE_COUNT_MAX" :step="500"
-                    v-model:minValue="localFilters.vote_count_min"
-                    v-model:maxValue="voteCountMax"
+                    :min="0" :max="6" :step="1"
+                    v-model:minValue="popularityMinIdx"
+                    v-model:maxValue="popularityMaxIdx"
                 />
             </div>
 
@@ -122,14 +120,9 @@ const emit = defineEmits<{
 
 const currentYear = new Date().getFullYear()
 const localFilters = ref<Filters>({ ...DEFAULT_FILTERS })
-const VOTE_COUNT_MAX = 50000
 const RUNTIME_MAX = 180
-const voteCountMax = ref(localFilters.value.vote_count_max ?? VOTE_COUNT_MAX)
 const runtimeMinValue = ref(localFilters.value.runtime_min ?? 0)
 const runtimeMaxValue = ref(localFilters.value.runtime_max ?? RUNTIME_MAX)
-watch(voteCountMax, (v) => {
-    localFilters.value.vote_count_max = v >= VOTE_COUNT_MAX ? null : v
-})
 watch(runtimeMinValue, (v) => {
     localFilters.value.runtime_min = v === 0 ? null : v
 })
@@ -152,15 +145,13 @@ const runtimeLabel = computed(() => {
     return `${lo} — ${hi}`
 })
 
-const popularityLabel = (n: number): string => {
-    if (n >= VOTE_COUNT_MAX) return '∞'
-    if (n >= 30000) return 'Blockbuster'
-    if (n >= 10000) return 'Populaire'
-    if (n >= 3000) return 'Grand public'
-    if (n >= 1000) return 'Indépendant'
-    if (n > 0) return 'Confidentiel'
-    return 'Tous'
-}
+const POPULARITY_VALUES = [0, 500, 1000, 3000, 10000, 30000, 50000]
+const POPULARITY_LABELS = ['Tous', 'Confidentiel', 'Indépendant', 'Grand public', 'Populaire', 'Blockbuster', '∞']
+const popularityMinIdx = ref(0)
+const popularityMaxIdx = ref(6)
+watch(popularityMinIdx, (i) => { localFilters.value.vote_count_min = POPULARITY_VALUES[i] })
+watch(popularityMaxIdx, (i) => { localFilters.value.vote_count_max = i >= 6 ? null : POPULARITY_VALUES[i] })
+
 const hasVoted = ref(false)
 const submitting = ref(false)
 const votesCount = ref(0)

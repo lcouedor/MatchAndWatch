@@ -41,10 +41,11 @@ const trackStyle = computed(() => {
     const hi = pct(Math.max(props.minValue, props.maxValue))
     return {
         background: `linear-gradient(to right,
-            rgba(118,86,245,0.2) ${lo}%,
+            rgba(118,86,245,0.15) ${lo}%,
             #7656F5 ${lo}%,
-            #7656F5 ${hi}%,
-            rgba(118,86,245,0.2) ${hi}%)`
+            #C548E8 ${(lo + hi) / 2}%,
+            #FF3D7F ${hi}%,
+            rgba(118,86,245,0.15) ${hi}%)`
     }
 })
 
@@ -102,21 +103,21 @@ const onMax = (e: Event) => {
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        background: $primaryColor;
+        background: linear-gradient(135deg, $primaryColor, $neonViolet);
         cursor: pointer;
         pointer-events: all;
-        box-shadow: 0 0 8px rgba(118, 86, 245, 0.5);
+        box-shadow: 0 0 10px rgba(197, 72, 232, 0.6), 0 0 20px rgba(255, 61, 127, 0.25);
     }
 
     &::-moz-range-thumb {
         width: 22px;
         height: 22px;
         border-radius: 50%;
-        background: $primaryColor;
+        background: linear-gradient(135deg, $primaryColor, $neonViolet);
         cursor: pointer;
         border: none;
         pointer-events: all;
-        box-shadow: 0 0 8px rgba(118, 86, 245, 0.5);
+        box-shadow: 0 0 10px rgba(197, 72, 232, 0.6), 0 0 20px rgba(255, 61, 127, 0.25);
     }
 }
 </style>

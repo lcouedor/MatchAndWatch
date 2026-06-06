@@ -213,7 +213,8 @@ export default class RoomService {
     code: string,
     watcherId: number,
     step: number,
-    filmIds: number[]
+    filmIds: number[],
+    dislikedFilmIds: number[] = []
   ): Promise<void> {
     const room = await Room.findBy('code', code)
     if (!room) throw new AppError('Room not found', 404)
@@ -225,6 +226,13 @@ export default class RoomService {
       .whereIn('film_id', filmIds)
       .where('room_id', room.id)
       .update({ is_active: true })
+
+    if (dislikedFilmIds.length > 0) {
+      await BucketRoom.query()
+        .whereIn('film_id', dislikedFilmIds)
+        .where('room_id', room.id)
+        .increment('dislike_count', 1)
+    }
 
     await watcher.merge({ step }).save()
 

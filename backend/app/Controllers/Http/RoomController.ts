@@ -67,9 +67,9 @@ export default class RoomController {
   }
 
   public async watcherAddFilmsToBucket({ request, response }: HttpContextContract) {
-    const { code, watcher_id, step, filmIds } = await request.validate(AddFilmsToBucketValidator)
+    const { code, watcher_id, step, filmIds, dislikedFilmIds } = await request.validate(AddFilmsToBucketValidator)
     try {
-      await roomService.addFilmsToBucket(code, watcher_id, step, filmIds)
+      await roomService.addFilmsToBucket(code, watcher_id, step, filmIds, dislikedFilmIds ?? [])
       return response.status(200).json({ success: true })
     } catch (error) {
       const status = error instanceof AppError ? error.status : 500

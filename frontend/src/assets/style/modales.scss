@@ -10,8 +10,7 @@
     left: 0;
     flex-direction: column;
 
-    //Un gris foncé transparent
-    background-color: rgba(0, 0, 0, 0.9);
+    background-color: $backgroundColor;
 
     transition: all 0.3s;
     overflow: hidden;
@@ -39,8 +38,12 @@
         color: $textColorPrimary;
 
         h2{
-            color: $primaryColor;
             margin-top: 5vh;
+            background: linear-gradient(135deg, $primaryColor 0%, $neonViolet 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(118, 86, 245, 0.3));
         }
     }
 }

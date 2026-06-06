@@ -39,7 +39,7 @@ const copied = ref(false)
 watch(() => props.show, async (visible) => {
     if (visible && !qrDataUrl.value) {
         const base = process.env.VUE_APP_PUBLIC_URL || window.location.origin
-    const url = `${base}/?code=${props.roomCode}`
+        const url = `${base}/#/?code=${props.roomCode}`
         qrDataUrl.value = await QRCode.toDataURL(url, {
             width: 240,
             margin: 2,
@@ -104,8 +104,9 @@ const copyCode = async () => {
 .qrCode {
     border-radius: 14px;
     overflow: hidden;
-    border: 3px solid $primaryColor;
+    border: 3px solid rgba(255, 61, 127, 0.6);
     flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(255, 61, 127, 0.4), 0 0 48px rgba(197, 72, 232, 0.2);
 
     img {
         display: block;

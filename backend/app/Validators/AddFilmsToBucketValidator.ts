@@ -12,6 +12,7 @@ export default class AddFilmsToBucketValidator {
     watcher_id: schema.number([rules.unsigned()]),
     step: schema.number([rules.unsigned()]),
     filmIds: schema.array().members(schema.number([rules.unsigned()])),
+    dislikedFilmIds: schema.array.optional().members(schema.number([rules.unsigned()])),
   })
 
   public messages: CustomMessages = {

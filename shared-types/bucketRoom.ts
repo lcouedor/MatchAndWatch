@@ -4,6 +4,7 @@ export interface BucketRoom {
     film_id: number;
     weight?: number;
     is_active?: boolean;
+    dislike_count?: number;
     createdAt?: string;
     updatedAt?: string;
 }

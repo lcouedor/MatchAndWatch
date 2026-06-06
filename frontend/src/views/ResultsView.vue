@@ -50,8 +50,38 @@
         <div v-if="!winner" class="noWinner">
             <p>Aucun film sélectionné</p>
         </div>
+
+        <div class="rejectedSection" v-if="rejectedFilms.length > 0">
+            <h2 class="rankingTitle">Les oubliés</h2>
+            <div class="rejectedCarousel">
+                <div v-for="film in rejectedFilms" :key="film.id" class="rejectedCard" @click="synopsisFilm = film">
+                    <img
+                        v-if="film.poster_path"
+                        :src="`https://image.tmdb.org/t/p/w154/${film.poster_path}`"
+                        :alt="film.title"
+                    />
+                    <span class="rejectedTitle">{{ film.title }}</span>
+                </div>
+            </div>
+        </div>
     </div>
     </div>
+
+    <!-- Bottom sheet synopsis films oubliés -->
+    <Teleport to="body">
+        <Transition name="synopsis-sheet">
+            <div v-if="synopsisFilm" class="synopsisOverlay" @click="synopsisFilm = null">
+                <div class="synopsisSheet" @click.stop>
+                    <div class="sheetHandle"></div>
+                    <div class="sheetHeader">
+                        <span class="sheetTitle">{{ synopsisFilm.title }}</span>
+                        <button class="sheetClose" @click="synopsisFilm = null">✕</button>
+                    </div>
+                    <p class="sheetBody">{{ synopsisFilm.overview }}</p>
+                </div>
+            </div>
+        </Transition>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -65,9 +95,12 @@ import StepProgress from '@/components/StepProgress.vue';
 const props = defineProps<{
     room: Room | null;
     movies: TMDBFilm[];
+    allMovies?: TMDBFilm[];
 }>();
 
 const watcherId = sessionStorage.getItem('watcherId');
+
+const synopsisFilm = ref<TMDBFilm | null>(null);
 
 const watcherList = computed(() => {
     if (!props.room || !props.room.watchers) return [];
@@ -93,6 +126,15 @@ const rankedFilms = computed<{ film: TMDBFilm; weight: number }[]>(() => {
 const top5 = computed(() => rankedFilms.value.slice(0, 5));
 
 const winner = computed<TMDBFilm | null>(() => rankedFilms.value[0]?.film ?? null);
+
+const rejectedFilms = computed<TMDBFilm[]>(() => {
+    if (!props.room?.bucket || !props.allMovies?.length) return [];
+    const movieMap = new Map(props.allMovies.map(m => [m.id, m]));
+    return props.room.bucket
+        .filter((b: BucketRoom) => !b.is_active && (b.dislike_count ?? 0) > 0)
+        .map((b: BucketRoom) => movieMap.get(b.film_id))
+        .filter((m): m is TMDBFilm => m !== undefined);
+});
 
 function getYear(date?: string): number | null {
     if (!date) return null;

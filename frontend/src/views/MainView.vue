@@ -52,7 +52,7 @@
             <ResultsView
                 v-else
                 key="results"
-                :room="room" :movies="moviesList"
+                :room="room" :movies="moviesList" :allMovies="fullMoviesList"
             />
         </Transition>
 
@@ -90,7 +90,9 @@ const roomCode: string = route.params.roomCode as string;
 
 const room = ref<Room | null>(null);
 const moviesList = ref<TMDBFilm[]>([]);
+const fullMoviesList = ref<TMDBFilm[]>([]);
 const userBucket = ref<TMDBFilm[]>([]);
+const swipeSeenIds = ref<number[]>([]);
 const ready = ref<boolean>(false);
 const userStep = ref<number>(0);
 const leftRoomClick = ref<number>(0);
@@ -185,9 +187,8 @@ const updateRoom = async () => {
     userStep.value = foundWatcher ? foundWatcher.step : 0;
 
     if ((room.value.minStep ?? 0) >= 1 && room.value.bucket) {
-        room.value.bucket = room.value.bucket.filter(film => film.is_active);
         moviesList.value = moviesList.value.filter(film =>
-            room.value?.bucket?.some(b => b.film_id === film.id) ?? false
+            room.value?.bucket?.some(b => b.film_id === film.id && b.is_active) ?? false
         );
     }
 };
@@ -203,18 +204,24 @@ const getRoom = async (): Promise<Room> => {
 
 const getFilms = async (): Promise<TMDBFilm[]> => {
     if (!room.value?.bucket) return [];
-    return await Promise.all(room.value.bucket.map(async (film) => {
+    const films = await Promise.all(room.value.bucket.map(async (film) => {
         const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, { movieId: film.film_id });
         return response.data as TMDBFilm;
     }));
+    fullMoviesList.value = films;
+    return films;
 };
 
-const validStep1 = async () => {
+const validStep1 = async (seenIds: number[] = []) => {
+    swipeSeenIds.value = seenIds;
+    const likedIds = new Set(userBucket.value.map(f => f.id));
+    const dislikedIds = seenIds.filter(id => !likedIds.has(id));
     const response: apiResponse<any> = await post('room/addFilmBucket', {
         code: roomCode,
         watcher_id: sessionStorage.getItem('watcherId'),
         step: 1,
         filmIds: userBucket.value.map(film => film.id),
+        dislikedFilmIds: dislikedIds,
     });
     if (response.success) {
         userStep.value = 1;

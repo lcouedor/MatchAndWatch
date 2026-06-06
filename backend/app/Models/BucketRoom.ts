@@ -25,6 +25,9 @@ export default class BucketRoom extends BaseModel {
   @column()
   public is_active: boolean
 
+  @column()
+  public dislike_count: number
+
   @column.dateTime({ autoCreate: true })
   public createdAt: DateTime
 
