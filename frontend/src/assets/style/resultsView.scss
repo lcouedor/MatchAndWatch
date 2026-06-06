@@ -1,50 +1,175 @@
 @use 'variables' as *;
 
-.resultList{
+// ─── WINNER ───────────────────────────────────────────────
+
+.winnerSection {
+    position: relative;
+    width: 100vw;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.winnerBg {
+    position: absolute;
+    inset: -10%;
+    background-size: cover;
+    background-position: center top;
+    filter: blur(32px) brightness(0.35);
+    z-index: -1;
+}
+
+.winnerContent {
+    position: relative;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    padding: 24px 20px 28px;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
 
-    .imgContainer{
-        margin-top: 3vh;
-        margin-bottom: 3vh;
-        position: relative;
-        height: 40dvh;
-        width: 100vw;
+.winnerBadge {
+    background: rgba(118, 86, 245, 0.25);
+    border: 1.5px solid rgba(118, 86, 245, 0.6);
+    color: #B6ACFF;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 16px;
+    border-radius: $stdRadius;
+}
 
-        img{
-            position: absolute;
-            height: 40dvh;
+.winnerPoster {
+    width: 52vw;
+    max-width: 240px;
+    border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+    object-fit: cover;
+}
 
-            &:nth-child(1){
-                filter: blur(20px);
-            }
-        }
+.winnerTitle {
+    font-size: clamp(1.4rem, 6vw, 2rem);
+    font-weight: 800;
+    color: $textColorPrimary;
+    text-align: center;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.winnerMeta {
+    font-size: 0.9rem;
+    color: rgba(224, 224, 224, 0.55);
+    margin: 0;
+}
+
+.winnerGenres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+.genreChip {
+    background: rgba(118, 86, 245, 0.18);
+    border: 1px solid rgba(118, 86, 245, 0.35);
+    color: #B6ACFF;
+    font-size: 0.75rem;
+    padding: 3px 12px;
+    border-radius: $stdRadius;
+}
+
+// ─── OVERVIEW ─────────────────────────────────────────────
+
+.overviewSection {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+    p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: rgba(224, 224, 224, 0.65);
+        margin: 0;
     }
+}
 
-    div{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+// ─── RANKING ──────────────────────────────────────────────
+
+.rankingSection {
+    padding: 20px 16px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rankingTitle {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(224, 224, 224, 0.35);
+    margin: 0 0 4px 4px;
+}
+
+.rankRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+
+    &.rankFirst {
+        background: rgba(118, 86, 245, 0.12);
+        border: 1px solid rgba(118, 86, 245, 0.25);
     }
+}
 
-    .dataFilm{
-        display: flex;
-        color: $textColorPrimary;
-        font-size: $textFontSizes;
+.rankNum {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(224, 224, 224, 0.3);
+    min-width: 20px;
+    text-align: center;
 
-        .genresList{
-            background-color: $primaryColor;
-            width: 100%;
-            display: flex;
-            flex-wrap: wrap;
-            flex-direction: row;
-            margin: 1vh;
-
-            p{
-                padding: 1vh;
-            }
-        }
+    .rankFirst & {
+        color: $primaryColor;
     }
+}
 
+.rankPoster {
+    width: 36px;
+    height: 54px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.rankFilmTitle {
+    flex: 1;
+    font-size: 0.9rem;
+    color: $textColorPrimary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rankScore {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+
+    &.scorePos  { filter: none; }
+    &.scoreNeutral { opacity: 0.4; }
+    &.scoreNeg  { filter: grayscale(0.3); }
+}
+
+// ─── NO WINNER ────────────────────────────────────────────
+
+.noWinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60dvh;
+    color: rgba(224, 224, 224, 0.4);
+    font-size: 1rem;
 }

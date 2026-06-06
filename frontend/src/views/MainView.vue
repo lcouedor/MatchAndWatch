@@ -1,22 +1,16 @@
 <template>
     <div class="bodyApp">
         <div class="headerMain">
-            <div class="copyZone normalButton">
+            <div class="copyZone normalButton" @click="showQr = true">
                 {{ roomCode }}
-                <div class="symbols" @click="copyToClipboard">
-                    <span ref="copySymbol" class="copySymbol symbolVisible">
-                        <img src="../assets/images/copy.png" alt="">
-                    </span>
-                    <span ref="validCopySymbol" class="validCopySymbol">
-                        <img src="../assets/images/check.png" alt="">
-                    </span>
-                </div>
             </div>
 
             <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
 
             <span class="info" @click="showInfoModal" v-if="isFilterVoteStep || userStep in [0,1]">i</span>
         </div>
+
+        <QrCodeOverlay :show="showQr" :roomCode="roomCode" @close="showQr = false" />
 
         <Transition name="scene" mode="out-in">
             <!-- Étape vote des filtres -->
@@ -76,6 +70,7 @@ import ResultsView from '@/views/ResultsView.vue';
 import ModaleInfo from '@/modales/ModaleInfo.vue'
 import FilterVotingStep from '@/components/FilterVotingStep.vue'
 import FilterSummaryScreen from '@/components/FilterSummaryScreen.vue'
+import QrCodeOverlay from '@/components/QrCodeOverlay.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, onUnmounted, ref, computed } from "vue";
 import { triggerSnackbar, hideSnackbar } from '../utils/utils';
@@ -93,9 +88,6 @@ const route: any = useRoute();
 const router = useRouter();
 const roomCode: string = route.params.roomCode as string;
 
-const copySymbol = ref<HTMLElement | null>(null);
-const validCopySymbol = ref<HTMLElement | null>(null);
-
 const room = ref<Room | null>(null);
 const moviesList = ref<TMDBFilm[]>([]);
 const userBucket = ref<TMDBFilm[]>([]);
@@ -105,6 +97,7 @@ const leftRoomClick = ref<number>(0);
 const watcherId = ref<number | null>(null);
 const filterVoteCount = ref<number>(0);
 const filterSummaryDismissed = ref<boolean>(false);
+const showQr = ref<boolean>(false);
 let snackbarId: number | null = null;
 
 // Vrai si on est en mode vote de filtres et que les filtres ne sont pas encore définis
@@ -152,35 +145,6 @@ const onFiltersLocked = async () => {
 
 const showInfoModal = () => {
     modaleInfo.value?.$el.classList.add('showModal');
-};
-
-const copyToClipboard = async () => {
-    const showSuccess = () => {
-        copySymbol.value?.classList.remove('symbolVisible');
-        validCopySymbol.value?.classList.add('symbolVisible');
-        setTimeout(() => {
-            copySymbol.value?.classList.add('symbolVisible');
-            validCopySymbol.value?.classList.remove('symbolVisible');
-        }, 1000);
-    };
-
-    try {
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(roomCode);
-        } else {
-            const ta = document.createElement('textarea');
-            ta.value = roomCode;
-            ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0;';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-        }
-        showSuccess();
-    } catch {
-        alert('Impossible de copier le code de la room');
-    }
 };
 
 const leftRoom = async () => {

@@ -179,6 +179,21 @@ export default class RoomService {
       return { watcherName, roomDeleted: true }
     }
 
+    // Si on est en mode vote de filtres et que les filtres ne sont pas encore verrouillés,
+    // le départ peut avoir débloqué la situation (tous les restants ont voté)
+    if (room.filter_mode === 'vote' && room.filters === null) {
+      const remainingVotes = await room.related('filterVotes').query()
+      if (remainingVotes.length >= remaining.length) {
+        const aggregated = this.aggregateFilters(remainingVotes.map((v) => v.filters))
+        await room.merge({ filters: aggregated }).save()
+        const films = await tmdbService.getRandomFilms(room.bucket_size * 2, aggregated)
+        await Promise.all(
+          films.map((film) => BucketRoom.create({ room_id: room.id, film_id: film.id }))
+        )
+        Ws.io.sockets.emit(`updateRoom:${code}`, { display: false, message: '' })
+      }
+    }
+
     return { watcherName, roomDeleted: false }
   }
 

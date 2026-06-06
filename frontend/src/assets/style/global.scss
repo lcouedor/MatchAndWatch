@@ -189,12 +189,24 @@ select, input{
     .info{
         margin-top: 0;
         margin-left: auto;
-    }  
-    
+    }
+
+    .qrBtn {
+        margin-left: auto;
+        font-size: 1.4rem;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        line-height: 1;
+        padding: 4px;
+
+        &:hover { opacity: 1; }
+    }
+
     .copyZone, .leftRoom{
         height: 100%;
     }
-    
+
 }
 
 .stepPage, .loadingView{
