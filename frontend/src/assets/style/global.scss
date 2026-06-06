@@ -83,12 +83,13 @@ select, input{
         height: 5vh;
 
         //Un cercle avec un dégradé
-        background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)) padding-box,linear-gradient(to right, $primaryColor, $accentColor) border-box;
+        background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)) padding-box,
+                    linear-gradient(to right, $primaryColor, $neonViolet, $neonPink, $accentColor) border-box;
         border-radius: 50em;
         border: 4px solid transparent;
 
         //Un halo autour du cercle
-        box-shadow: 0 0 0 1px $primaryColor, 0 0 0 2px $accentColor;
+        box-shadow: 0 0 0 1px rgba(118, 86, 245, 0.4), 0 0 14px rgba(197, 72, 232, 0.45);
     }
 }
 
@@ -103,15 +104,16 @@ select, input{
 }
 
 .normalButton{
-    background-color: $primaryColor;
+    background: linear-gradient(135deg, $primaryColor 0%, darken($primaryColor, 8%) 100%);
     color: $textColorPrimary;
-    border: 1px solid $tertiaryColor;
+    border: 1px solid rgba(197, 72, 232, 0.5);
     border-radius: $stdRadius;
     padding: 1vh;
     font-size: $textFontSizes;
     min-width: 25vw;
     margin-left: 1vh;
     margin-right: 1vh;
+    box-shadow: 0 0 14px rgba(118, 86, 245, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
 .snackbar{
@@ -153,8 +155,11 @@ select, input{
         align-items: center;
         justify-content: space-evenly;
         font-size: $textFontSizes;
-
         position: relative;
+        background: linear-gradient(#1C1C1C, #1C1C1C) padding-box,
+                    linear-gradient(135deg, $primaryColor, $neonViolet) border-box;
+        border: 1.5px solid transparent !important;
+        box-shadow: 0 0 10px rgba(197, 72, 232, 0.2);
 
         .symbols{
             height: 100%;
@@ -273,7 +278,9 @@ select, input{
         padding: 2vh;
         font-size: $textFontSizes;
         color: white;
-        background-color: $primaryColor;
+        background: linear-gradient(135deg, rgba(118, 86, 245, 0.85), rgba(197, 72, 232, 0.7));
+        border: 1px solid rgba(255, 61, 127, 0.25);
+        box-shadow: 0 0 12px rgba(197, 72, 232, 0.2);
     }
 }
 

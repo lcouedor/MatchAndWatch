@@ -14,12 +14,15 @@ h1{
 
     padding: 2vh;
 
-    color: $textColorPrimary;
     font-size: 2em;
-
     text-transform: uppercase;
-
     transition: all 0.3s;
+
+    background: linear-gradient(135deg, $primaryColor 0%, $neonViolet 50%, $neonPink 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 18px rgba(197, 72, 232, 0.35));
 }
 
 .buttonsHome, .buttonsModal{

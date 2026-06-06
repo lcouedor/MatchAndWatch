@@ -9,6 +9,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    border-bottom: 1px solid rgba(197, 72, 232, 0.15);
 }
 
 .headerProgress {
@@ -141,8 +142,7 @@
 
 #leftZone{
     .background{
-        background-color: red;
-        
+        background: linear-gradient(135deg, rgba(220, 40, 60, 0.85), rgba(150, 20, 40, 0.7));
     }
     span{
         right: 2%;
@@ -151,7 +151,7 @@
 
 #rightZone{
     .background{
-        background-color: green;
+        background: linear-gradient(135deg, rgba(118, 86, 245, 0.85), rgba(197, 72, 232, 0.7));
     }
     span{
         left: 2%;

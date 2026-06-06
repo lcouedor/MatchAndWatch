@@ -30,32 +30,40 @@
 }
 
 .winnerBadge {
-    background: rgba(118, 86, 245, 0.25);
-    border: 1.5px solid rgba(118, 86, 245, 0.6);
-    color: #B6ACFF;
+    background: linear-gradient(#1C1C1C, #1C1C1C) padding-box,
+                linear-gradient(135deg, $primaryColor, $neonViolet, $neonPink) border-box;
+    border: 1.5px solid transparent;
+    color: #C9BAFF;
     font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     padding: 5px 16px;
     border-radius: $stdRadius;
+    box-shadow: 0 0 16px rgba(197, 72, 232, 0.3);
 }
 
 .winnerPoster {
     width: 52vw;
     max-width: 240px;
     border-radius: 12px;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7),
+                0 0 0 2px rgba(197, 72, 232, 0.4),
+                0 0 32px rgba(197, 72, 232, 0.25);
     object-fit: cover;
 }
 
 .winnerTitle {
     font-size: clamp(1.4rem, 6vw, 2rem);
     font-weight: 800;
-    color: $textColorPrimary;
     text-align: center;
     margin: 0;
     line-height: 1.2;
+    background: linear-gradient(135deg, #E0E0E0 0%, #C548E8 60%, #FF3D7F 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 16px rgba(197, 72, 232, 0.45));
 }
 
 .winnerMeta {
@@ -120,8 +128,10 @@
     background: rgba(255, 255, 255, 0.04);
 
     &.rankFirst {
-        background: rgba(118, 86, 245, 0.12);
-        border: 1px solid rgba(118, 86, 245, 0.25);
+        background: linear-gradient(#1C1C1C, #1C1C1C) padding-box,
+                    linear-gradient(135deg, $primaryColor, $neonViolet, $neonPink) border-box;
+        border: 1px solid transparent;
+        box-shadow: 0 0 12px rgba(197, 72, 232, 0.15);
     }
 }
 
