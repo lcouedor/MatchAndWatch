@@ -3,6 +3,13 @@ import { TMDBDiscoverResponse, TMDBFilm, TMDBFilmDetails } from 'SharedTypes/tmd
 import Env from '@ioc:Adonis/Core/Env'
 import type { Filters } from 'SharedTypes/filters'
 
+const SORT_OPTIONS = [
+  'popularity.desc',
+  'release_date.desc',
+  'release_date.asc',
+  'vote_average.desc',
+]
+
 export default class TMDBService {
   private apiKey: string
   private baseURL: string
@@ -15,6 +22,14 @@ export default class TMDBService {
       baseURL: this.baseURL,
       params: { api_key: this.apiKey },
     })
+  }
+
+  private shuffle<T>(arr: T[]): T[] {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    return arr
   }
 
   private buildDiscoverParams(filters: Filters): Record<string, string | number> {
@@ -44,56 +59,76 @@ export default class TMDBService {
   }
 
   public async getNumberOfPages(filters: Filters): Promise<number> {
-    try {
-      const response: AxiosResponse<TMDBDiscoverResponse> = await this.http.get('/discover/movie', {
-        params: this.buildDiscoverParams(filters),
-      })
-      return response.data.total_pages
-    } catch (error) {
-      throw new Error('Failed to fetch number of pages from TMDB')
-    }
+    const response: AxiosResponse<TMDBDiscoverResponse> = await this.http.get('/discover/movie', {
+      params: this.buildDiscoverParams(filters),
+    })
+    return response.data.total_pages
   }
 
   public async getRandomFilms(numFilms: number, filters: Filters): Promise<TMDBFilm[]> {
-    try {
-      const discoverParams = this.buildDiscoverParams(filters)
-      const maxPages = await this.getNumberOfPages(filters)
+    const discoverParams = {
+      ...this.buildDiscoverParams(filters),
+      // Tri aléatoire à chaque session pour couvrir différentes parties du catalogue
+      sort_by: SORT_OPTIONS[Math.floor(Math.random() * SORT_OPTIONS.length)],
+    }
 
-      if (maxPages === 0) {
-        throw new Error('Aucun film ne correspond aux filtres choisis')
-      }
+    // Requête initiale : récupérer le nombre total de pages
+    const countResponse = await this.http.get<TMDBDiscoverResponse>('/discover/movie', {
+      params: discoverParams,
+    })
+    const maxPages = Math.min(countResponse.data.total_pages, 500)
 
-      const randomFilms: TMDBFilm[] = []
-      let attempts = 0
-      const maxAttempts = numFilms * 10
+    if (maxPages === 0) {
+      throw new Error('Aucun film ne correspond aux filtres choisis')
+    }
 
-      while (randomFilms.length < numFilms && attempts < maxAttempts) {
-        attempts++
-        const randomPage = Math.floor(Math.random() * Math.min(maxPages, 500)) + 1
+    // Mélange de toutes les pages disponibles (Fisher-Yates)
+    const pagePool = this.shuffle(Array.from({ length: maxPages }, (_, i) => i + 1))
 
-        const response = await this.http.get('/discover/movie', {
-          params: { ...discoverParams, page: randomPage },
+    // Nombre de pages à fetcher en parallèle : ceil(numFilms / 20) + 1 en buffer
+    // Chaque page TMDB retourne 20 films au maximum
+    const batchSize = Math.min(Math.ceil(numFilms / 20) + 1, maxPages)
+    const batchPages = pagePool.slice(0, batchSize)
+
+    const batchResponses = await Promise.all(
+      batchPages.map((page) =>
+        this.http.get<TMDBDiscoverResponse>('/discover/movie', {
+          params: { ...discoverParams, page },
         })
+      )
+    )
 
-        const films: TMDBFilm[] = response.data.results as TMDBFilm[]
-        if (films.length === 0) continue
+    // Fusion et mélange de tous les films du batch
+    const batchFilms = this.shuffle(batchResponses.flatMap((r) => r.data.results))
 
-        const randomIndex = Math.floor(Math.random() * films.length)
-        const film = films[randomIndex]
+    const seenIds = new Set<number>()
+    const selectedFilms: TMDBFilm[] = []
 
-        if (!randomFilms.some((m) => m.id === film.id)) {
-          randomFilms.push(film)
+    for (const film of batchFilms) {
+      if (!seenIds.has(film.id) && selectedFilms.length < numFilms) {
+        seenIds.add(film.id)
+        selectedFilms.push(film)
+      }
+    }
+
+    // Fallback séquentiel si le batch initial n'a pas suffi
+    for (let i = batchSize; i < pagePool.length && selectedFilms.length < numFilms; i++) {
+      const response = await this.http.get<TMDBDiscoverResponse>('/discover/movie', {
+        params: { ...discoverParams, page: pagePool[i] },
+      })
+      for (const film of this.shuffle(response.data.results)) {
+        if (!seenIds.has(film.id) && selectedFilms.length < numFilms) {
+          seenIds.add(film.id)
+          selectedFilms.push(film)
         }
       }
-
-      if (randomFilms.length < numFilms) {
-        throw new Error('Pas assez de films pour ces filtres — essaie d\'élargir les critères')
-      }
-
-      return randomFilms
-    } catch (error) {
-      throw new Error('Failed to fetch random films from TMDB: ' + error)
     }
+
+    if (selectedFilms.length < numFilms) {
+      throw new Error("Pas assez de films pour ces filtres — essaie d'élargir les critères")
+    }
+
+    return selectedFilms
   }
 
   public async getFilmDetails(film_id: number): Promise<TMDBFilmDetails> {
