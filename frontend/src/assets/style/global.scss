@@ -116,102 +116,141 @@ select, input{
     box-shadow: 0 0 14px rgba(118, 86, 245, 0.3), inset 0 1px 0 rgba(255,255,255,0.08);
 }
 
-.snackbar{
-    position: absolute;
-    bottom: -20%;
+.snackbarContainer {
+    position: fixed;
+    bottom: 28px;
     left: 50%;
     transform: translateX(-50%);
-    width: 80vw;
-    background-color: $primaryColor;
-    border-radius: $stdRadius;
-    padding: 1vh;
-    pointer-events: none;
-    font-size: $textFontSizes;
-    display: table-cell;
-    text-align: center;
     z-index: 2000;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
+    width: min(88vw, 360px);
+    pointer-events: none;
 }
 
-.snackbarVisible{
+.snackbar {
+    background: rgba(24, 24, 28, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-left: 3px solid $primaryColor;
+    border-radius: 12px;
+    padding: 12px 16px;
     pointer-events: auto;
-    bottom: 2%;
+    font-size: 0.88rem;
+    color: $textColorPrimary;
+    line-height: 1.4;
+    box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(118, 86, 245, 0.08),
+        0 0 16px rgba(118, 86, 245, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.snack-enter-active {
+    transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.snack-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.snack-enter-from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+}
+.snack-leave-to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
 }
 
 //la zone Main (donc une fois dans la room)
 //---------------------
 //---------------------
 //---------------------
-.headerMain{
+.headerMain {
     height: 10dvh;
     width: 100vw;
     display: flex;
     align-items: center;
     position: fixed;
     top: 0;
-    padding: 2vh;
+    padding: 0 16px;
+    gap: 10px;
+    background: rgba(28, 28, 28, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 100;
 
-    .copyZone{
+    .copyZone {
         display: flex;
         align-items: center;
-        justify-content: space-evenly;
-        font-size: $textFontSizes;
-        position: relative;
+        justify-content: center;
+        height: auto;
+        min-width: unset;
+        padding: 7px 16px;
+        margin: 0;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
         background: linear-gradient(#1C1C1C, #1C1C1C) padding-box,
                     linear-gradient(135deg, $primaryColor, $neonViolet) border-box;
         border: 1.5px solid transparent !important;
-        box-shadow: 0 0 10px rgba(197, 72, 232, 0.2);
-
-        .symbols{
-            height: 100%;
-            width: 30%;
-            position: relative;
-        }
-
-        span{
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            height: 60%;
-
-            img{
-                height: 100%;
-                transform: rotateY(90deg);
-                transition: all 0.3s;
-            }
-        }
-
-        .symbolVisible img{
-            transform: rotateY(0deg);
-            transition: all 0.3s;
-        }
-
-        .copySymbol, .validCopySymbol{
-            height: 100%;
-        }
-    }
-
-    .info{
-        margin-top: 0;
-        margin-left: auto;
-    }
-
-    .qrBtn {
-        margin-left: auto;
-        font-size: 1.4rem;
+        box-shadow: 0 0 12px rgba(118, 86, 245, 0.2);
         cursor: pointer;
-        opacity: 0.7;
-        transition: opacity 0.2s;
-        line-height: 1;
-        padding: 4px;
-
-        &:hover { opacity: 1; }
     }
 
-    .copyZone, .leftRoom{
-        height: 100%;
+    .leftRoom {
+        height: auto;
+        min-width: unset;
+        padding: 7px 14px;
+        margin-left: auto;
+        margin-right: 0;
+        font-size: 0.78rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(224, 224, 224, 0.4);
+        box-shadow: none;
+        transition: border-color 0.2s, color 0.2s;
+
+        &:hover, &:active {
+            border-color: rgba(255, 80, 80, 0.35);
+            color: rgba(255, 130, 130, 0.7);
+        }
     }
 
+    .info {
+        margin-top: 0;
+        margin-left: 0;
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border-color: rgba(255, 255, 255, 0.15);
+        color: rgba(224, 224, 224, 0.45);
+        transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+
+    }
+}
+
+.info.infoPulse {
+    animation: infoPulseAnim 1s ease-in-out 5;
+    border-color: $primaryColor;
+    color: rgba(224, 224, 224, 0.85);
+}
+
+@keyframes infoPulseAnim {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(118, 86, 245, 0);
+        border-color: $primaryColor;
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(118, 86, 245, 0.25), 0 0 20px rgba(197, 72, 232, 0.5);
+        border-color: $neonViolet;
+    }
 }
 
 .stepPage, .loadingView{

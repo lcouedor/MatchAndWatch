@@ -1,12 +1,13 @@
 <template>
-    <div
-      v-for="(snackbar, index) in snackbars"
-      :key="snackbar.id"
-      class="snackbar snackbarVisible"
-      :style="{ bottom: `${2 + index * 6}%` }"
-    >
-      {{ snackbar.message }}
-    </div>
+    <TransitionGroup name="snack" tag="div" class="snackbarContainer">
+        <div
+            v-for="snackbar in snackbars"
+            :key="snackbar.id"
+            class="snackbar"
+        >
+            {{ snackbar.message }}
+        </div>
+    </TransitionGroup>
 </template>
 
 <script setup lang="ts">

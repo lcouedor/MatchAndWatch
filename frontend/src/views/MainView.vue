@@ -7,7 +7,12 @@
 
             <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
 
-            <span class="info" @click="showInfoModal" v-if="isFilterVoteStep || userStep in [0,1]">i</span>
+            <span
+            class="info infoPulse"
+            :key="`info-${userStep}-${isFilterVoteStep}`"
+            @click="showInfoModal"
+            v-if="isFilterVoteStep || userStep in [0,1]"
+        >i</span>
         </div>
 
         <QrCodeOverlay :show="showQr" :roomCode="roomCode" @close="showQr = false" />
