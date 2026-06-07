@@ -6,6 +6,18 @@ Application mobile-first permettant à un groupe de choisir collectivement un fi
 
 ---
 
+## Liens
+
+| Service | URL |
+|---------|-----|
+| **Frontend (prod)** | https://match-and-watch.vercel.app |
+| **Backend (prod)** | https://matchandwatch-backend.onrender.com |
+| **Base de données** | Supabase — projet `Match&Watch` (région `eu-west-1`) |
+
+> Le backend tourne sur Render free tier : il se met en veille après 15 minutes d'inactivité. La première requête après une période d'inactivité peut prendre 30 à 60 secondes le temps du cold start.
+
+---
+
 ## Sommaire
 
 - [Comment ça marche](#comment-ça-marche)
@@ -16,6 +28,7 @@ Application mobile-first permettant à un groupe de choisir collectivement un fi
 - [Lancer en développement](#lancer-en-développement)
 - [Déploiement](#déploiement)
 - [API Backend](#api-backend)
+- [Schéma de base de données](#schéma-de-base-de-données)
 
 ---
 
@@ -37,10 +50,10 @@ Les participants rejoignent via le code à 4 caractères affiché en haut de l'�
 Chaque participant voit les films dans un ordre aléatoire (style Tinder). Swipe à droite → like, à gauche → passe. La session se termine quand le quota de likes est atteint ou que tous les films ont été vus.
 
 **4. Vote**
-Une fois que tout le monde a swipé, l'union des films likés par au moins une personne passe au vote. Chaque participant note chaque film sur une échelle en 5 niveaux (❌ Jamais · 👎 Bof · · Neutre · 👍 Ouais · ❤️ Top).
+Une fois que tout le monde a swipé, l'union des films likés par au moins une personne passe au vote. Chaque participant note chaque film sur une échelle en 5 niveaux (❌ Jamais · 👎 Bof · Neutre · 👍 Ouais · ❤️ Top).
 
 **5. Résultats**
-Le film avec le score cumulé le plus élevé est désigné gagnant. Un classement des 5 premiers est affiché, ainsi qu'un carousel des films vus et collectivement rejetés.
+Le film avec le score cumulé le plus élevé est désigné gagnant. Un classement des 5 premiers est affiché, ainsi qu'un carousel des films collectivement rejetés pendant le swipe.
 
 ### Modes de filtres
 
@@ -64,10 +77,9 @@ Le créateur peut définir un temps limite par étape. À expiration, la contrib
 | AdonisJS 5 | Framework Node.js (routing, ORM, validation) |
 | Lucid ORM | Accès base de données avec migrations |
 | Socket.IO | Synchronisation temps réel entre participants |
-| PostgreSQL | Base de données production |
+| PostgreSQL | Base de données production (Supabase) |
 | SQLite | Base de données développement local |
-| TMDB API | Sélection aléatoire et métadonnées des films |
-| bing-translate-api | Traduction automatique des synopsis (EN → FR) |
+| TMDB API | Sélection aléatoire de films + métadonnées en français |
 | TypeScript | Typage complet |
 
 ### Frontend — [Vue 3](https://vuejs.org/)
@@ -114,7 +126,6 @@ matchAndWatch/
 │       ├── modales/            # ModaleInfo, ModaleCreateRoom, ModalSlug
 │       ├── assets/style/       # SCSS global + fichiers par vue
 │       ├── api/                # Wrapper axios (get / post / del)
-│       ├── composables/        # useSnackbar
 │       └── router/             # createWebHashHistory
 │
 └── shared-types/               # Interfaces TypeScript partagées
@@ -233,40 +244,66 @@ Le frontend est accessible depuis d'autres appareils sur le réseau local (l'opt
 
 ## Déploiement
 
-L'application se déploie en deux services indépendants.
+L'application est déployée sur trois services :
 
-### Backend
+| Composant | Service | Déclencheur |
+|-----------|---------|-------------|
+| Backend | [Render](https://render.com) (Web Service) | Push sur `main` |
+| Frontend | [Vercel](https://vercel.com) (Static) | Push sur `main` |
+| Base de données | [Supabase](https://supabase.com) (PostgreSQL) | Manuel (migrations) |
 
-Build de production :
+### Backend sur Render
 
-```bash
-cd backend
-node ace build --production
-# Les fichiers compilés sont dans build/
-cd build && node server.js
-```
+**Configuration actuelle :**
+- Root Directory : `backend`
+- Build Command :
+  ```
+  cd ../shared-types && npm install && npm run build && mkdir -p ../backend/shared-types && cp -r ./build ../backend/shared-types/ && cd ../backend && npm install --include=dev && node ace generate:manifest && node ace build --production --ignore-ts-errors && cd build && npm install --production
+  ```
+- Start Command : `cd build && node ace migration:run --force && node server.js`
+- Branch : `main` uniquement
 
-**Exemple : Render**
-- Build command : `npm install && node ace build --production`
-- Start command : `node server.js`
-- Working directory : `backend/`
-- Variables d'environnement : `DB_CONNECTION=pg`, clés `PG_*`, clés TMDB, `APP_KEY`
+**Variables d'environnement Render :**
 
-La base PostgreSQL peut être hébergée sur Supabase, Neon ou Railway.
+| Variable | Valeur |
+|----------|--------|
+| `NODE_ENV` | `production` |
+| `HOST` | `0.0.0.0` |
+| `PORT` | `10000` |
+| `APP_KEY` | *(généré avec `node ace generate:key`)* |
+| `APP_NAME` | `Match&Watch` |
+| `DRIVE_DISK` | `local` |
+| `DB_CONNECTION` | `pg` |
+| `PG_HOST` | `aws-0-eu-west-1.pooler.supabase.com` |
+| `PG_PORT` | `5432` |
+| `PG_USER` | `postgres.gfvatelivexmwfikhoqe` |
+| `PG_PASSWORD` | *(mot de passe Supabase)* |
+| `PG_DB_NAME` | `postgres` |
+| `TMDB_API_KEY` | *(clé TMDB)* |
+| `TMDB_READ_ACCESS_TOKEN` | *(token TMDB)* |
+| `TMDB_BASE_URL` | `https://api.themoviedb.org/3` |
 
-### Frontend
+> **Note Supabase** : on utilise le **connection pooler** Supabase (hostname `aws-0-eu-west-1.pooler.supabase.com`) plutôt que la connexion directe, car Render free tier ne supporte pas IPv6 et le hostname direct de Supabase résout en IPv6. Le format du `PG_USER` avec le pooler est `postgres.{project_ref}`.
 
-```bash
-cd frontend
-npm run build
-# Fichiers statiques dans dist/ — déployables sur n'importe quel hébergeur statique
-```
+### Frontend sur Vercel
 
-**Exemples :** GitHub Pages, Netlify, Vercel, Render Static Site.
+**Configuration actuelle :**
+- Root Directory : `frontend`
+- Build Command : `npm run build`
+- Output Directory : `dist`
+- Branch : `main` uniquement (désactiver les Preview Deployments dans Settings → Git)
 
-Définir `VUE_APP_API_URL` avec l'URL publique du backend avant le build.
+**Variables d'environnement Vercel :**
 
-> Le router utilise `createWebHashHistory()`. Les URLs sont de la forme `https://domaine.com/#/match/XXXX`. Les QR codes de partage utilisent le format `/#/?code=XXXX`.
+| Variable | Valeur |
+|----------|--------|
+| `VUE_APP_API_URL` | `https://matchandwatch-backend.onrender.com` |
+
+### Base de données Supabase
+
+Les migrations sont appliquées automatiquement au démarrage du backend (`node ace migration:run --force` dans le Start Command). Pour appliquer une migration manuellement, utiliser le dashboard Supabase → SQL Editor, ou via le MCP Supabase.
+
+**Projet Supabase :** `gfvatelivexmwfikhoqe` — région `eu-west-1`
 
 ---
 
@@ -289,7 +326,7 @@ Définir `VUE_APP_API_URL` avec l'URL publique du backend avant le build.
 
 | Méthode | Route | Description |
 |---------|-------|-------------|
-| `GET` | `/movie` | Détails TMDB d'un film, synopsis traduit en FR |
+| `GET` | `/movie` | Détails TMDB d'un film en français (`?movieId=<id>`) |
 
 ### Temps réel
 
@@ -314,4 +351,5 @@ filter_votes
 ```
 
 **`is_active`** — `true` si au moins un participant a liké le film (il passe au vote).  
-**`dislike_count`** — nombre de participants qui ont vu et swipé le film à gauche. Utilisé pour afficher la section "Les oubliés" dans les résultats.
+**`dislike_count`** — nombre de participants qui ont swipé le film à gauche. Utilisé pour la section "Les oubliés" dans les résultats.  
+**`weight`** — score cumulé des votes (somme des notes de tous les participants). Détermine le classement final.

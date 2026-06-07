@@ -1,4 +1,3 @@
-import { translate } from 'bing-translate-api'
 import Database from '@ioc:Adonis/Lucid/Database'
 import Room from 'App/Models/Room'
 import Watcher from 'App/Models/Watcher'
@@ -278,15 +277,6 @@ export default class RoomService {
   }
 
   public async getMovieWithTranslation(movieId: number): Promise<TMDBFilmDetails> {
-    const movie = await tmdbService.getFilmDetails(movieId)
-
-    try {
-      const result = await translate(movie.overview, 'en', 'fr')
-      movie.overview = result?.translation || movie.overview
-    } catch {
-      // traduction non critique, on garde l'original
-    }
-
-    return movie
+    return tmdbService.getFilmDetails(movieId)
   }
 }

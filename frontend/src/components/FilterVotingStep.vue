@@ -131,7 +131,7 @@ watch(runtimeMaxValue, (v) => {
 })
 watch(() => props.externalVotesCount, (count) => {
     if (count !== undefined) votesCount.value = count
-})
+}, { immediate: true })
 
 const formatRuntime = (v: number): string => {
     if (v === 0) return '0'
@@ -210,6 +210,7 @@ const submitVote = async () => {
     if (!res.success) return
 
     hasVoted.value = true
+    votesCount.value = Math.max(votesCount.value + 1, 1)
 
     if (res.data?.filtersLocked) {
         emit('filtersLocked')

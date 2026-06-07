@@ -133,7 +133,9 @@ export default class TMDBService {
 
   public async getFilmDetails(film_id: number): Promise<TMDBFilmDetails> {
     try {
-      const response: AxiosResponse<TMDBFilmDetails> = await this.http.get(`/movie/${film_id}`)
+      const response: AxiosResponse<TMDBFilmDetails> = await this.http.get(`/movie/${film_id}`, {
+        params: { language: 'fr-FR' },
+      })
       return response.data as TMDBFilmDetails
     } catch (error) {
       throw new Error('Failed to fetch film details from TMDB')
