@@ -1,7 +1,7 @@
 <template>
     <div v-if="!ready" class="loadingView">
         <div class="loadingData">
-            <p>On y est presque !</p>
+            <p>{{ $t('swipe.loading') }}</p>
             <div class="waiting waitingVisible">
                 <div class="spin"></div>
             </div>
@@ -13,14 +13,14 @@
             <StepProgress
                 :done="swipesDone"
                 :total="room?.watchers?.length ?? 0"
-                label="ont terminé"
+                :label="$t('swipe.finished')"
                 class="headerProgress"
             />
             <div class="countdown" v-if="timeLeft !== null">⏱ {{ timeLeftLabel }}</div>
         </div>
 
         <div class="bandeauSwipe">
-            {{ userBucket.length }}/{{ room?.bucket_size }} films likés
+            {{ $t('swipe.liked', { done: userBucket.length, total: room?.bucket_size ?? 0 }) }}
         </div>
 
         <div class="titre" v-if="currentFilm">
@@ -35,15 +35,15 @@
 
             <!-- Carte courante, interactive -->
             <div v-if="currentFilm" class="swipeCard" ref="card"
-                @touchstart="onDragStart" @touchmove="onDragMove" @touchend="onDragEnd">
+                @touchstart="onDragStart" @touchend="onDragEnd">
                 <img :src="`https://image.tmdb.org/t/p/w780/${currentFilm.poster_path}`" />
                 <div id="leftZone" ref="actualLeft">
                     <div class="background"></div>
-                    <span>No Watch</span>
+                    <span>{{ $t('swipe.noWatch') }}</span>
                 </div>
                 <div id="rightZone" ref="actualRight">
                     <div class="background"></div>
-                    <span>Watch</span>
+                    <span>{{ $t('swipe.watch') }}</span>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onUnmounted, nextTick } from "vue";
+import { ref, watch, computed, onMounted, onUnmounted, nextTick } from "vue";
 import StepProgress from "@/components/StepProgress.vue";
 import { Room } from 'shared-types/room';
 import { TMDBFilm } from 'shared-types/tmdb';
@@ -121,8 +121,15 @@ watch([() => props.room?.step_timeout, () => films.value.length], ([timeout, fil
     }
 }, { immediate: true })
 
+// Listener non-passif pour que preventDefault bloque le scroll natif pendant le swipe
+watch(card, (newCard, oldCard) => {
+    if (oldCard) oldCard.removeEventListener('touchmove', onDragMove as EventListener)
+    if (newCard) newCard.addEventListener('touchmove', onDragMove as EventListener, { passive: false })
+})
+
 onUnmounted(() => {
     if (timer) clearInterval(timer)
+    if (card.value) card.value.removeEventListener('touchmove', onDragMove as EventListener)
 })
 
 watch([() => props.ready, () => props.movies], ([newReady, newMovies]) => {
@@ -196,6 +203,7 @@ const onDragStart = (e: TouchEvent) => {
 
 const onDragMove = (e: TouchEvent) => {
     if (!card.value) return
+    e.preventDefault()
 
     const diff = e.touches[0].clientX - initialX.value
     const quarter = window.innerWidth / 4

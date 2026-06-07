@@ -33,6 +33,9 @@ export default class Room extends BaseModel {
     @column()
     public step_timeout: number | null;
 
+    @column()
+    public language: string;
+
     @column.dateTime({ autoCreate: true })
     public createdAt: DateTime;
 

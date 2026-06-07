@@ -1,20 +1,20 @@
 <template>
     <ModalSlug modaleId="modaleJoinRoom" ref="modaleJoinRoom">
-        <h1>Rejoindre une Room</h1>
+        <h1>{{ $t('joinRoom.title') }}</h1>
         <div class="inputBloc">
-            <label>Quel est le code de la room ?</label>
+            <label>{{ $t('joinRoom.code') }}</label>
             <input v-model="inputRoomCodeContent" ref="inputRoomCode" @input="handleInputRoomCode()" maxlength="4">
             <p class="errorMessage">{{ errors.code }}</p>
         </div>
 
         <div class="inputBloc">
-            <label>Comment t'appelles-tu Padawan ?</label>
+            <label>{{ $t('joinRoom.yourName') }}</label>
             <input v-model="inputNomWatcherContent" ref="inputNomWatcher" @input="handleInputNom()" maxlength="16">
             <p class="errorMessage">{{ errors.name }}</p>
         </div>
 
         <div class="buttonsModal">
-            <Button @click="joinRoom">Rejoindre la Room</Button>
+            <Button @click="joinRoom">{{ $t('joinRoom.joinBtn') }}</Button>
         </div>
     </ModalSlug>
 </template>
@@ -25,11 +25,13 @@ import { post } from "../api/services";
 import ModalSlug from "./ModalSlug.vue";
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { uppercaseChar } from "../utils/utils";
 import { Watcher } from "shared-types/watcher";
 import { apiResponse } from "shared-types/apiResponse";
 
 
+const { t } = useI18n()
 const router = useRouter();
 const route = useRoute();
 
@@ -65,7 +67,7 @@ const joinRoom = async () => {
         inputNomWatcher.value?.classList.add('errorInput');
 
         //On ajoute un message d'erreur
-        errors.value.name = 'Hop là, pas si vite, il me faut ton nom !';
+        errors.value.name = t('joinRoom.errorName');
         erreur = true;
     }
     if (!inputRoomCodeContent.value) {
@@ -73,7 +75,7 @@ const joinRoom = async () => {
         inputRoomCode.value?.classList.add('errorInput');
 
         //On ajoute un message d'erreur
-        errors.value.code = 'Hop là, pas si vite, il me faut le code de la room !';
+        errors.value.code = t('joinRoom.errorCode');
         erreur = true;
     }
     if (erreur) {
@@ -86,7 +88,7 @@ const joinRoom = async () => {
     };
     let watcher: apiResponse<Watcher> | null = await post<Watcher>('room/join/', data);
     if (!watcher.success) {
-        errors.value.code = watcher.error || 'Hum, ce code ne semble pas valide...';
+        errors.value.code = watcher.error || t('joinRoom.errorServer');
         inputRoomCode.value?.classList.add('errorInput');
         return;
     }

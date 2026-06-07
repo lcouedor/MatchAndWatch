@@ -5,14 +5,14 @@
                 {{ roomCode }}
             </div>
 
-            <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
-
             <span
-            class="info infoPulse"
-            :key="`info-${userStep}-${isFilterVoteStep}`"
-            @click="showInfoModal"
-            v-if="isFilterVoteStep || userStep in [0,1]"
-        >i</span>
+                class="info infoPulse"
+                :key="`info-${userStep}-${isFilterVoteStep}`"
+                @click="showInfoModal"
+                v-if="isFilterVoteStep || userStep in [0,1]"
+            >i</span>
+
+            <button class="leftRoom normalButton" @click="leftRoom">Exit</button>
         </div>
 
         <QrCodeOverlay :show="showQr" :roomCode="roomCode" @close="showQr = false" />
@@ -78,6 +78,7 @@ import FilterSummaryScreen from '@/components/FilterSummaryScreen.vue'
 import QrCodeOverlay from '@/components/QrCodeOverlay.vue'
 import { useRoute, useRouter } from 'vue-router'
 import { onMounted, onUnmounted, ref, computed } from "vue";
+import { useI18n } from 'vue-i18n'
 import { triggerSnackbar, hideSnackbar } from '../utils/utils';
 
 import { Room } from 'shared-types/room';
@@ -86,6 +87,7 @@ import { apiResponse } from 'shared-types/apiResponse';
 import { TMDBFilm } from 'shared-types/tmdb';
 
 const socket = io(process.env.VUE_APP_API_URL || "");
+const { t } = useI18n()
 
 const modaleInfo = ref<InstanceType<typeof ModaleInfo> | null>(null);
 
@@ -128,9 +130,12 @@ onMounted(async () => {
         moviesList.value = await getFilms();
     }
 
-    socket.on(`updateRoom:${roomCode}`, async (message: {display: boolean, message: string, filterVoteCount?: number}) => {
+    socket.on(`updateRoom:${roomCode}`, async (message: {display: boolean, message: string, messageKey?: string, messageName?: string, filterVoteCount?: number}) => {
         if (message.display) {
-            triggerSnackbar(message.message, 3000);
+            const text = message.messageKey
+                ? t(message.messageKey, { name: message.messageName ?? '' })
+                : message.message
+            triggerSnackbar(text, 3000);
         }
         if (message.filterVoteCount !== undefined) {
             filterVoteCount.value = message.filterVoteCount;
@@ -157,7 +162,7 @@ const showInfoModal = () => {
 const leftRoom = async () => {
     if (leftRoomClick.value == 0) {
         leftRoomClick.value++;
-        snackbarId = triggerSnackbar('Appuyez à nouveau pour quitter', 20000)
+        snackbarId = triggerSnackbar(t('snack.exitConfirm'), 20000)
         setTimeout(() => { leftRoomClick.value = 0; }, 20000);
     } else {
         hideSnackbar(snackbarId || 0);
@@ -209,8 +214,9 @@ const getRoom = async (): Promise<Room> => {
 
 const getFilms = async (): Promise<TMDBFilm[]> => {
     if (!room.value?.bucket) return [];
+    const language = room.value.language ?? 'fr-FR';
     const films = await Promise.all(room.value.bucket.map(async (film) => {
-        const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, { movieId: film.film_id });
+        const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, { movieId: film.film_id, language });
         return response.data as TMDBFilm;
     }));
     fullMoviesList.value = films;

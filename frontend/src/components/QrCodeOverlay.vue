@@ -3,23 +3,23 @@
         <Transition name="qr-overlay">
             <div v-if="show" class="qrOverlayBackdrop" @click.self="$emit('close')">
                 <div class="qrOverlayCard">
-                    <p class="qrLabel">Rejoindre la room</p>
+                    <p class="qrLabel">{{ $t('qr.title') }}</p>
 
                     <div class="qrCode">
                         <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR code" />
                         <div v-else class="qrPlaceholder" />
                     </div>
 
-                    <p class="qrSep">ou entrer le code</p>
+                    <p class="qrSep">{{ $t('qr.or') }}</p>
 
                     <p class="qrRoomCode">{{ roomCode }}</p>
 
                     <button class="copyBtn" @click="copyCode">
-                        <span v-if="copied">✓ Copié !</span>
-                        <span v-else>Copier le code</span>
+                        <span v-if="copied">{{ $t('qr.copied') }}</span>
+                        <span v-else>{{ $t('qr.copy') }}</span>
                     </button>
 
-                    <button class="closeBtn" @click="$emit('close')">Fermer</button>
+                    <button class="closeBtn" @click="$emit('close')">{{ $t('qr.close') }}</button>
                 </div>
             </div>
         </Transition>
@@ -28,11 +28,13 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import QRCode from 'qrcode'
 
 const props = defineProps<{ show: boolean; roomCode: string }>()
 defineEmits<{ (e: 'close'): void }>()
 
+const { t } = useI18n()
 const qrDataUrl = ref('')
 const copied = ref(false)
 
@@ -64,7 +66,7 @@ const copyCode = async () => {
         copied.value = true
         setTimeout(() => { copied.value = false }, 1500)
     } catch {
-        alert('Impossible de copier le code')
+        alert(t('qr.copyError'))
     }
 }
 </script>

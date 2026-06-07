@@ -88,6 +88,19 @@
     border-radius: $stdRadius;
 }
 
+.imdbLink {
+    display: inline-block;
+    background: #F5C518;
+    color: #000;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-decoration: none;
+    line-height: 1.6;
+}
+
 // ─── OVERVIEW ─────────────────────────────────────────────
 
 .overviewSection {
@@ -162,6 +175,19 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.rankClickable {
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:active { background: rgba(118, 86, 245, 0.12); }
+}
+
+.rankInfoHint {
+    font-size: 1.1rem;
+    color: rgba(118, 86, 245, 0.5);
+    flex-shrink: 0;
 }
 
 .rankScore {

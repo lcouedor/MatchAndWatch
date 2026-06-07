@@ -1,9 +1,17 @@
 <template>
     <ModalSlug modaleId="modaleCreateRoom" ref="modaleCreateRoom">
-        <h1>Créer une Room</h1>
+        <h1>{{ $t('createRoom.title') }}</h1>
 
         <div class="inputBloc">
-            <label>Format de session</label>
+            <label>
+                {{ $t('createRoom.format') }}
+                <span class="infoTip" @click="showFormatInfo = !showFormatInfo">?</span>
+            </label>
+            <div v-if="showFormatInfo" class="formatInfoBox">
+                <p><strong>{{ $t('createRoom.formatBlitz') }}</strong> — {{ $t('createRoom.formatInfoBlitz') }}</p>
+                <p><strong>{{ $t('createRoom.formatStandard') }}</strong> — {{ $t('createRoom.formatInfoStandard') }}</p>
+                <p><strong>{{ $t('createRoom.formatOdyssey') }}</strong> — {{ $t('createRoom.formatInfoOdyssey') }}</p>
+            </div>
             <select v-model="selectedBucketSize">
                 <option v-for="option in bucketSizeOptions" :key="option.value"
                     :value="option.value" :selected="option.default">
@@ -13,41 +21,41 @@
         </div>
 
         <div class="inputBloc">
-            <label>Comment t'appelles-tu Padawan ?</label>
+            <label>{{ $t('createRoom.yourName') }}</label>
             <input v-model="inputNomWatcher" @input="handleInputNom()" maxlength="16" />
             <p class="errorMessage">{{ errorName }}</p>
         </div>
 
         <!-- Mode filtres (standard / odyssey uniquement) -->
         <div class="inputBloc" v-if="selectedBucketSize > 3">
-            <label>Choix des filtres</label>
+            <label>{{ $t('createRoom.filterChoice') }}</label>
             <select v-model="filterMode">
-                <option value="creator">Je choisis les filtres</option>
-                <option value="vote">Tout le monde vote pour les filtres</option>
+                <option value="creator">{{ $t('createRoom.filterCreator') }}</option>
+                <option value="vote">{{ $t('createRoom.filterVote') }}</option>
             </select>
         </div>
 
         <!-- Timeout par étape -->
         <div class="inputBloc">
-            <label>Temps max par étape</label>
+            <label>{{ $t('createRoom.timeout') }}</label>
             <select v-model="stepTimeoutOption">
-                <option value="0">Illimité</option>
+                <option value="0">{{ $t('createRoom.timeoutUnlimited') }}</option>
                 <option value="60">1 min</option>
                 <option value="120">2 min</option>
                 <option value="180">3 min</option>
                 <option value="300">5 min</option>
                 <option value="600">10 min</option>
             </select>
-            <p class="hint" v-if="estimatedTime">⏱ Durée estimée : {{ estimatedTime }}</p>
+            <p class="hint" v-if="estimatedTime">{{ $t('createRoom.estimatedTime', { time: estimatedTime }) }}</p>
         </div>
 
         <!-- Filtres (mode créateur uniquement) -->
         <div class="filtersSection" v-if="filterMode === 'creator'">
-            <p class="sectionTitle">Filtres</p>
+            <p class="sectionTitle">{{ $t('createRoom.filters') }}</p>
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Note</span>
+                    <span>{{ $t('createRoom.filterRating') }}</span>
                     <span class="filterValue">{{ filters.vote_average_min }} — {{ filters.vote_average_max }}</span>
                 </div>
                 <DualRangeSlider
@@ -59,7 +67,7 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Année de sortie</span>
+                    <span>{{ $t('createRoom.filterYear') }}</span>
                     <span class="filterValue">{{ filters.release_year_min }} — {{ filters.release_year_max }}</span>
                 </div>
                 <DualRangeSlider
@@ -71,8 +79,8 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Popularité</span>
-                    <span class="filterValue">{{ POPULARITY_LABELS[popularityMinIdx] }} — {{ POPULARITY_LABELS[popularityMaxIdx] }}</span>
+                    <span>{{ $t('createRoom.filterPopularity') }}</span>
+                    <span class="filterValue">{{ popularityLabelFn(popularityMinIdx) }} — {{ popularityLabelFn(popularityMaxIdx) }}</span>
                 </div>
                 <DualRangeSlider
                     :min="0" :max="6" :step="1"
@@ -83,7 +91,7 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Durée</span>
+                    <span>{{ $t('createRoom.filterDuration') }}</span>
                     <span class="filterValue">{{ runtimeLabel }}</span>
                 </div>
                 <DualRangeSlider
@@ -95,8 +103,8 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Genres</span>
-                    <span class="filterHint">{{ filters.genres.length === 0 ? 'tous' : filters.genres.length + ' sélectionné(s)' }}</span>
+                    <span>{{ $t('createRoom.filterGenres') }}</span>
+                    <span class="filterHint">{{ filters.genres.length === 0 ? $t('createRoom.filterGenresAll') : $t('createRoom.filterGenresCount', { n: filters.genres.length }) }}</span>
                 </div>
                 <div class="genreGrid">
                     <button
@@ -106,17 +114,17 @@
                         :class="{ selected: filters.genres.includes(genre.id) }"
                         @click="toggleGenre(genre.id)"
                         type="button"
-                    >{{ genre.name }}</button>
+                    >{{ $t(`genres.${genre.id}`) }}</button>
                 </div>
             </div>
         </div>
 
         <Spinner v-if="waiting" style="margin-top: 20px;">
-            On recherche les meilleurs films pour toi
+            {{ $t('createRoom.loading') }}
         </Spinner>
 
         <div class="buttonsModal">
-            <Button @click="createRoom">Créer la Room</Button>
+            <Button @click="createRoom">{{ $t('createRoom.createBtn') }}</Button>
         </div>
     </ModalSlug>
 </template>
@@ -129,15 +137,19 @@ import ModalSlug from "./ModalSlug.vue";
 import { ref, computed, watch } from "vue";
 import Spinner from "@/components/Spinner.vue";
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { uppercaseChar } from "../utils/utils";
+import { getLocale } from '@/i18n';
 import { Room } from "shared-types/room";
 import { Watcher } from "shared-types/watcher";
 import { apiResponse } from "shared-types/apiResponse";
 import { Filters, TMDB_GENRES, DEFAULT_FILTERS } from "shared-types/filters";
 import type { FilterMode } from "shared-types/room";
 
+const { t } = useI18n()
 const router = useRouter()
 const currentYear = new Date().getFullYear()
+const showFormatInfo = ref(false)
 
 interface BucketSizeOption {
     name: string;
@@ -146,13 +158,13 @@ interface BucketSizeOption {
     default: boolean;
 }
 
-const bucketSizeOptions: BucketSizeOption[] = [
-    { name: "Blitz", value: 3, description: "Pour les pressés", default: false },
-    { name: "Standard", value: 5, description: "Pour les indécis", default: true },
-    { name: "Odyssey", value: 10, description: "Pour les amoureux du ciné", default: false },
-]
+const bucketSizeOptions = computed((): BucketSizeOption[] => [
+    { name: t('createRoom.formatBlitz'), value: 3, description: t('createRoom.formatDescBlitz'), default: false },
+    { name: t('createRoom.formatStandard'), value: 5, description: t('createRoom.formatDescStandard'), default: true },
+    { name: t('createRoom.formatOdyssey'), value: 10, description: t('createRoom.formatDescOdyssey'), default: false },
+])
 
-const selectedBucketSize = ref<number>(bucketSizeOptions.find(o => o.default)?.value || 5)
+const selectedBucketSize = ref<number>(5)
 const inputNomWatcher = ref<string>("")
 const errorName = ref<string>("")
 const modaleCreateRoom = ref<InstanceType<typeof ModalSlug> | null>(null)
@@ -185,7 +197,9 @@ const runtimeLabel = computed(() => {
 })
 
 const POPULARITY_VALUES = [0, 500, 1000, 3000, 10000, 30000, 50000]
-const POPULARITY_LABELS = ['Tous', 'Confidentiel', 'Indépendant', 'Grand public', 'Populaire', 'Blockbuster', '∞']
+const POPULARITY_KEYS = ['all', 'indie', 'arthouse', 'mainstream', 'popular', 'blockbuster']
+const popularityLabelFn = (idx: number): string =>
+    idx >= 6 ? '∞' : t(`common.popularity.${POPULARITY_KEYS[idx]}`)
 const popularityMinIdx = ref(0)
 const popularityMaxIdx = ref(6)
 watch(popularityMinIdx, (i) => { filters.value.vote_count_min = POPULARITY_VALUES[i] })
@@ -223,17 +237,21 @@ const createRoom = async () => {
     errorName.value = ""
 
     if (!inputNomWatcher.value) {
-        errorName.value = "Hop là, pas si vite, il me faut ton nom !"
+        errorName.value = t('createRoom.errorName')
         return
     }
 
     waiting.value = true
+
+    const locale = getLocale()
+    const tmdbLanguage = locale === 'en' ? 'en-US' : 'fr-FR'
 
     const room: apiResponse<Room> = await post<Room>("room", {
         bucket_size: selectedBucketSize.value,
         filter_mode: filterMode.value,
         filters: filterMode.value === 'creator' ? filters.value : undefined,
         step_timeout: stepTimeout.value,
+        language: tmdbLanguage,
     })
 
     if (!room?.success || !room?.data?.code) {
@@ -346,5 +364,51 @@ defineExpose({
     font-size: 0.8rem;
     opacity: 0.5;
     margin: 2px 0 0;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.infoTip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(118, 86, 245, 0.5);
+    color: $primaryColor;
+    font-size: 0.7rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 0.15s;
+
+    &:active { background: rgba(118, 86, 245, 0.15); }
+}
+
+.formatInfoBox {
+    background: rgba(118, 86, 245, 0.08);
+    border: 1px solid rgba(118, 86, 245, 0.25);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+
+    p {
+        font-size: 0.82rem;
+        color: rgba(224, 224, 224, 0.7);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    strong {
+        color: $textColorPrimary;
+    }
 }
 </style>

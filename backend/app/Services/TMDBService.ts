@@ -131,10 +131,10 @@ export default class TMDBService {
     return selectedFilms
   }
 
-  public async getFilmDetails(film_id: number): Promise<TMDBFilmDetails> {
+  public async getFilmDetails(film_id: number, language = 'fr-FR'): Promise<TMDBFilmDetails> {
     try {
       const response: AxiosResponse<TMDBFilmDetails> = await this.http.get(`/movie/${film_id}`, {
-        params: { language: 'fr-FR' },
+        params: { language },
       })
       return response.data as TMDBFilmDetails
     } catch (error) {

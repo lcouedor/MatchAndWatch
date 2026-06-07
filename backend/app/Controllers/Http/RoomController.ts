@@ -18,11 +18,12 @@ const roomService = new RoomService()
 export default class RoomController {
   public async create({ request, response }: HttpContextContract) {
     const { bucket_size, filter_mode, filters, step_timeout } = await request.validate(CreateRoomValidator)
+    const language = request.input('language', 'fr-FR') as string
     try {
       const resolvedFilters: Filters | null = filters
         ? { ...DEFAULT_FILTERS, ...filters, vote_count_max: filters.vote_count_max ?? null, runtime_min: filters.runtime_min ?? null, runtime_max: filters.runtime_max ?? null } as Filters
         : null
-      const room = await roomService.createRoom(bucket_size, filter_mode, resolvedFilters, step_timeout ?? null)
+      const room = await roomService.createRoom(bucket_size, filter_mode, resolvedFilters, step_timeout ?? null, language)
       return response.status(201).json({ success: true, data: room })
     } catch (error) {
       console.error('[RoomController.create] Error:', error)
@@ -108,7 +109,8 @@ export default class RoomController {
   public async getMovie({ request, response }: HttpContextContract) {
     try {
       const { movieId } = request.only(['movieId']) as { movieId: number }
-      const movie = await roomService.getMovieWithTranslation(movieId)
+      const language = request.input('language', 'fr-FR') as string
+      const movie = await roomService.getMovieWithTranslation(movieId, language)
       return response.status(200).json({ success: true, data: movie })
     } catch (error) {
       const status = error instanceof AppError ? error.status : 500

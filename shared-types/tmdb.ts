@@ -14,6 +14,7 @@ export interface TMDBFilm {
 export interface TMDBFilmDetails extends TMDBFilm {
     tagline: string;
     genres: { id: number; name: string }[];
+    imdb_id?: string | null;
 }
 
 export interface TMDBDiscoverResponse {

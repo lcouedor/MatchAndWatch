@@ -58,7 +58,12 @@ select, input{
     border-radius: $stdRadius;
     padding: 2vh;
     font-size: $textFontSizes;
+    font-family: inherit;
     border: 2px solid $primaryColor;
+}
+
+button {
+    font-family: inherit;
 }
 
 .errorInput{

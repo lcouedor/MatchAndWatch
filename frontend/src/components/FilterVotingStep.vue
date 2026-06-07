@@ -5,7 +5,7 @@
             <StepProgress
                 :done="votesCount"
                 :total="totalWatchers"
-                label="ont voté"
+                :label="$t('vote.voted')"
                 class="headerProgress"
             />
             <div class="countdown" v-if="timeLeft !== null">
@@ -15,12 +15,12 @@
 
         <!-- Vote form -->
         <div v-if="!hasVoted" class="filterForm">
-            <h2>Vos préférences</h2>
-            <p class="subtitle">La médiane sera appliquée pour les valeurs, l'union pour les genres</p>
+            <h2>{{ $t('filterVote.title') }}</h2>
+            <p class="subtitle">{{ $t('filterVote.subtitle') }}</p>
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Note</span>
+                    <span>{{ $t('createRoom.filterRating') }}</span>
                     <span class="filterValue">{{ localFilters.vote_average_min }} — {{ localFilters.vote_average_max }}</span>
                 </div>
                 <DualRangeSlider
@@ -32,7 +32,7 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Année de sortie</span>
+                    <span>{{ $t('createRoom.filterYear') }}</span>
                     <span class="filterValue">{{ localFilters.release_year_min }} — {{ localFilters.release_year_max }}</span>
                 </div>
                 <DualRangeSlider
@@ -44,8 +44,8 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Popularité</span>
-                    <span class="filterValue">{{ POPULARITY_LABELS[popularityMinIdx] }} — {{ POPULARITY_LABELS[popularityMaxIdx] }}</span>
+                    <span>{{ $t('createRoom.filterPopularity') }}</span>
+                    <span class="filterValue">{{ popularityLabelFn(popularityMinIdx) }} — {{ popularityLabelFn(popularityMaxIdx) }}</span>
                 </div>
                 <DualRangeSlider
                     :min="0" :max="6" :step="1"
@@ -56,7 +56,7 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Durée</span>
+                    <span>{{ $t('createRoom.filterDuration') }}</span>
                     <span class="filterValue">{{ runtimeLabel }}</span>
                 </div>
                 <DualRangeSlider
@@ -68,8 +68,8 @@
 
             <div class="filterRow">
                 <div class="filterLabel">
-                    <span>Genres</span>
-                    <span class="filterHint">{{ localFilters.genres.length === 0 ? 'tous' : localFilters.genres.length + ' sél.' }}</span>
+                    <span>{{ $t('createRoom.filterGenres') }}</span>
+                    <span class="filterHint">{{ localFilters.genres.length === 0 ? $t('createRoom.filterGenresAll') : $t('createRoom.filterGenresCount', { n: localFilters.genres.length }) }}</span>
                 </div>
                 <div class="genreGrid">
                     <button
@@ -79,18 +79,18 @@
                         :class="{ selected: localFilters.genres.includes(genre.id) }"
                         @click="toggleGenre(genre.id)"
                         type="button"
-                    >{{ genre.name }}</button>
+                    >{{ $t(`genres.${genre.id}`) }}</button>
                 </div>
             </div>
 
             <button class="voteBtn" @click="submitVote" :disabled="submitting">
-                {{ submitting ? 'Envoi...' : 'Valider mes préférences' }}
+                {{ submitting ? $t('filterVote.sending') : $t('filterVote.validate') }}
             </button>
         </div>
 
         <!-- Waiting state -->
         <div v-else class="waitingScreen">
-            <p class="waitingTitle">En attente des autres participants</p>
+            <p class="waitingTitle">{{ $t('filterVote.waiting') }}</p>
             <div class="watchersList">
                 <div v-for="watcher in otherWatchers" :key="watcher.id" class="watcherInWait">
                     {{ watcher.name }}
@@ -102,6 +102,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { post } from '@/api/services'
 import DualRangeSlider from '@/components/DualRangeSlider.vue'
 import StepProgress from '@/components/StepProgress.vue'
@@ -118,6 +119,7 @@ const emit = defineEmits<{
     (e: 'filtersLocked'): void
 }>()
 
+const { t } = useI18n()
 const currentYear = new Date().getFullYear()
 const localFilters = ref<Filters>({ ...DEFAULT_FILTERS })
 const RUNTIME_MAX = 180
@@ -129,10 +131,6 @@ watch(runtimeMinValue, (v) => {
 watch(runtimeMaxValue, (v) => {
     localFilters.value.runtime_max = v >= RUNTIME_MAX ? null : v
 })
-watch(() => props.externalVotesCount, (count) => {
-    if (count !== undefined) votesCount.value = count
-}, { immediate: true })
-
 const formatRuntime = (v: number): string => {
     if (v === 0) return '0'
     const h = Math.floor(v / 60)
@@ -146,7 +144,9 @@ const runtimeLabel = computed(() => {
 })
 
 const POPULARITY_VALUES = [0, 500, 1000, 3000, 10000, 30000, 50000]
-const POPULARITY_LABELS = ['Tous', 'Confidentiel', 'Indépendant', 'Grand public', 'Populaire', 'Blockbuster', '∞']
+const POPULARITY_KEYS = ['all', 'indie', 'arthouse', 'mainstream', 'popular', 'blockbuster']
+const popularityLabelFn = (idx: number): string =>
+    idx >= 6 ? '∞' : t(`common.popularity.${POPULARITY_KEYS[idx]}`)
 const popularityMinIdx = ref(0)
 const popularityMaxIdx = ref(6)
 watch(popularityMinIdx, (i) => { localFilters.value.vote_count_min = POPULARITY_VALUES[i] })
@@ -155,6 +155,10 @@ watch(popularityMaxIdx, (i) => { localFilters.value.vote_count_max = i >= 6 ? nu
 const hasVoted = ref(false)
 const submitting = ref(false)
 const votesCount = ref(0)
+
+watch(() => props.externalVotesCount, (count) => {
+    if (count !== undefined) votesCount.value = count
+}, { immediate: true })
 const timeLeft = ref<number | null>(props.room.step_timeout ?? null)
 let timer: ReturnType<typeof setInterval> | null = null
 
@@ -231,8 +235,10 @@ const submitVote = async () => {
 .voteHeader {
     position: sticky;
     top: 0;
-    z-index: 5;
+    z-index: 50;
     background: $backgroundColor;
+    margin-top: -1px;
+    padding-top: calc(1vh + 1px);
     display: flex;
     align-items: center;
     gap: 12px;

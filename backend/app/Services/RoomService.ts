@@ -19,7 +19,8 @@ export default class RoomService {
     bucketSize: number,
     filterMode: FilterMode = 'creator',
     filters: Filters | null = null,
-    stepTimeout: number | null = null
+    stepTimeout: number | null = null,
+    language: string = 'fr-FR'
   ): Promise<Room> {
     const code = await Room.createCode()
 
@@ -33,6 +34,7 @@ export default class RoomService {
       filter_mode: filterMode,
       filters: resolvedFilters,
       step_timeout: stepTimeout,
+      language,
     })
 
     if (filterMode === 'creator') {
@@ -146,6 +148,8 @@ export default class RoomService {
     Ws.io.sockets.emit(`updateRoom:${code}`, {
       display: true,
       message: `${watcherName} a rejoint la room`,
+      messageKey: 'snack.joined',
+      messageName: watcherName,
     })
 
     return watcher
@@ -170,6 +174,8 @@ export default class RoomService {
     Ws.io.sockets.emit(`updateRoom:${code}`, {
       display: true,
       message: `${watcherName} a quitté la room`,
+      messageKey: 'snack.left',
+      messageName: watcherName,
     })
 
     const remaining = await room.related('watchers').query()
@@ -276,7 +282,7 @@ export default class RoomService {
     Ws.io.sockets.emit(`updateRoom:${code}`, { display: false, message: '' })
   }
 
-  public async getMovieWithTranslation(movieId: number): Promise<TMDBFilmDetails> {
-    return tmdbService.getFilmDetails(movieId)
+  public async getMovieWithTranslation(movieId: number, language = 'fr-FR'): Promise<TMDBFilmDetails> {
+    return tmdbService.getFilmDetails(movieId, language)
   }
 }

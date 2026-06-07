@@ -6,10 +6,10 @@
             <StepProgress
                 :done="swipesDone"
                 :total="room?.watchers?.length ?? 0"
-                label="ont terminé le swipe"
+                :label="$t('vote.swipeDone')"
             />
         </div>
-        <p class="waitingTitle">En attente des autres participants</p>
+        <p class="waitingTitle">{{ $t('vote.waiting') }}</p>
         <div class="watchersList">
             <div v-for="watcher in otherWatchers" :key="watcher.id" class="watcherInWait">
                 {{ watcher.name }}
@@ -24,7 +24,7 @@
             <StepProgress
                 :done="votesDone"
                 :total="room?.watchers?.length ?? 0"
-                label="ont voté"
+                :label="$t('vote.voted')"
                 class="headerProgress"
             />
             <div class="countdown" v-if="timeLeft !== null">⏱ {{ timeLeftLabel }}</div>
@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="buttonsContainer">
-                <button class="normalButton" @click="verifyRatings">Voter</button>
+                <button class="normalButton" @click="verifyRatings">{{ $t('vote.voteBtn') }}</button>
             </div>
         </div>
 
@@ -76,9 +76,12 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onUnmounted } from "vue";
+import { useI18n } from 'vue-i18n'
 import StepProgress from "@/components/StepProgress.vue";
 import { Room } from "shared-types/room";
 import { TMDBFilm } from "shared-types/tmdb";
+
+const { t } = useI18n()
 
 const props = defineProps<{
     room: Room | null,
@@ -95,13 +98,13 @@ const selectedNotes = ref(new Map<number, number>(
 
 const synopsisFilm = ref<TMDBFilm | null>(null)
 
-const ratingOptions = [
-    { value: -1000, emoji: '❌', label: 'Jamais' },
-    { value: -1,    emoji: '👎', label: 'Bof' },
-    { value: 0,     emoji: '·',  label: 'Neutre' },
-    { value: 1,     emoji: '👍', label: 'Ouais' },
-    { value: 2,     emoji: '❤️', label: 'Top' },
-]
+const ratingOptions = computed(() => [
+    { value: -1000, emoji: '❌', label: t('vote.never') },
+    { value: -1,    emoji: '👎', label: t('vote.meh') },
+    { value: 0,     emoji: '·',  label: t('vote.neutral') },
+    { value: 1,     emoji: '👍', label: t('vote.yes') },
+    { value: 2,     emoji: '❤️', label: t('vote.top') },
+])
 
 const watcherId: number | null = sessionStorage.getItem('watcherId') !== null
     ? Number(sessionStorage.getItem('watcherId'))

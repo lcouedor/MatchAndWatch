@@ -1,0 +1,182 @@
+{
+  "home": {
+    "create": "Create a room",
+    "join": "Join a room"
+  },
+  "createRoom": {
+    "title": "Create a Room",
+    "format": "Session format",
+    "formatBlitz": "Blitz",
+    "formatStandard": "Standard",
+    "formatOdyssey": "Odyssey",
+    "formatDescBlitz": "For the impatient",
+    "formatDescStandard": "For the indecisive",
+    "formatDescOdyssey": "For the cinema lovers",
+    "formatInfoBlitz": "3 films each. Fast, efficient, no time to hesitate.",
+    "formatInfoStandard": "5 films each. A good balance between choice and speed.",
+    "formatInfoOdyssey": "10 films each. For true cinephiles with a whole evening.",
+    "yourName": "What's your name, Padawan?",
+    "filterChoice": "Filter selection",
+    "filterCreator": "I choose the filters",
+    "filterVote": "Everyone votes for the filters",
+    "timeout": "Max time per step",
+    "timeoutUnlimited": "Unlimited",
+    "estimatedTime": "⏱ Estimated duration: {time}",
+    "filters": "Filters",
+    "filterRating": "Rating",
+    "filterYear": "Release year",
+    "filterPopularity": "Popularity",
+    "filterDuration": "Duration",
+    "filterGenres": "Genres",
+    "filterGenresAll": "all",
+    "filterGenresCount": "{n} sel.",
+    "createBtn": "Create the Room",
+    "loading": "Searching for the best films for you",
+    "errorName": "Hold on, I need your name first!",
+    "language": "Film language"
+  },
+  "joinRoom": {
+    "title": "Join a Room",
+    "code": "What's the room code?",
+    "yourName": "What's your name, Padawan?",
+    "joinBtn": "Join the Room",
+    "errorCode": "Wait, I need the room code!",
+    "errorName": "Hold on, I need your name first!",
+    "errorServer": "Hmm, this code doesn't seem valid..."
+  },
+  "swipe": {
+    "loading": "Almost there!",
+    "liked": "{done}/{total} films liked",
+    "finished": "finished",
+    "noWatch": "No Watch",
+    "watch": "Watch"
+  },
+  "vote": {
+    "voted": "have voted",
+    "waiting": "Waiting for other participants",
+    "swipeDone": "have finished swiping",
+    "voteBtn": "Vote",
+    "never": "Never",
+    "meh": "Meh",
+    "neutral": "Neutral",
+    "yes": "Yeah",
+    "top": "Top"
+  },
+  "filterVote": {
+    "title": "Your preferences",
+    "subtitle": "Median will be applied for values, union for genres",
+    "validate": "Confirm my preferences",
+    "sending": "Sending...",
+    "waiting": "Waiting for other participants"
+  },
+  "filterSummary": {
+    "title": "Applied filters",
+    "subtitle": "Result of the preference vote",
+    "filterYear": "Year",
+    "filterGenresAll": "All",
+    "filmLoading": "Selecting films…",
+    "start": "Start"
+  },
+  "results": {
+    "winnerBadge": "🏆 Film of the night",
+    "ranking": "Ranking",
+    "rejected": "The forgotten ones",
+    "noWinner": "No film selected",
+    "voted": "have voted",
+    "waiting": "Waiting for other participants"
+  },
+  "info": {
+    "home": {
+      "title": "Welcome to Match & Watch",
+      "intro": "The app that settles once and for all the question <em>\"What are we watching tonight?\"</em> — well, almost.",
+      "howTitle": "How does it work?",
+      "step1": "<strong>1. Create or join a room</strong> with your friends. A 4-letter code, and you're in.",
+      "step2": "<strong>2. Swipe the films</strong> based on your filters. Like what you want to see, ignore the rest.",
+      "step3": "<strong>3. Vote for your favourites</strong> among the films everyone liked.",
+      "step4": "<strong>4. Discover the winner</strong> — the film that scored the most points. And this time, no excuse to bail halfway.",
+      "filterVoteTitle": "In \"filter vote\" mode",
+      "filterVoteText": "Each participant votes for their preferences (genres, year, duration…). The median of the votes is applied — democracy, but make it work."
+    },
+    "filterVote": {
+      "title": "Vote for your preferences",
+      "intro": "Each participant picks their own search criteria. Don't worry, nobody's going to judge your taste… well, it depends on what you pick.",
+      "calcTitle": "How are the filters calculated?",
+      "calcSliders": "<strong>Sliders (rating, year, popularity, duration)</strong> — the median of all votes is used. A reasonable filter for everyone, rather than a dictatorship of the most demanding.",
+      "calcGenres": "<strong>Genres</strong> — the union. If at least one person wants thrillers, thrillers stay on the list. Solidarity.",
+      "timerTitle": "The timer",
+      "timerText": "You have {time} to vote. After that, your default preferences are submitted. They're reasonable, we promise. But you could have done better."
+    },
+    "swipe": {
+      "title": "Swipe time",
+      "swipeText": "<strong>Left</strong> if you don't want to see this film. <strong>Right</strong> if you're in. You know the drill.",
+      "quotaTitle": "Your quota",
+      "quotaText1": "The number of films to like is shown at the top of the page. You keep swiping until you reach your quota or run out of films.",
+      "quotaText2": "If the films run out before you reach your quota, the list was just short. Too bad — you work with what fate (and the filters) gave you.",
+      "randomTitle": "Random order",
+      "randomText": "Everyone sees the same films, but in a different order. No point trying to copy your neighbour.",
+      "timerTitle": "The timer",
+      "timerText": "You have {time} to swipe. When it hits zero, your bucket is submitted as is, even if incomplete. Swipe fast."
+    },
+    "vote": {
+      "title": "The final vote",
+      "intro": "Here you'll find all the films liked by at least one person in the room. Even the one you swiped left on. Yes, someone liked it. You know who.",
+      "howTitle": "How to vote?",
+      "howIntro": "Under each film, 5 buttons to express your level of enthusiasm:",
+      "ratingNever": "❌ <strong>Never</strong> — rather watch your grandma's TV",
+      "ratingMeh": "👎 <strong>Meh</strong> — maybe, if the others insist",
+      "ratingNeutral": "· <strong>Neutral</strong> — you don't care, but you're here anyway",
+      "ratingYes": "👍 <strong>Yeah</strong> — you're quite up for it",
+      "ratingTop": "❤️ <strong>Top</strong> — you've been waiting for this for weeks",
+      "synopsisTitle": "The synopsis",
+      "synopsisText": "Can't remember what this film is about? Tap the poster to show the synopsis. And no, you don't have a good excuse to vote blind.",
+      "timerTitle": "The timer",
+      "timerText": "You have {time} to vote. After that, your vote is submitted automatically with your current ratings. Don't procrastinate.",
+      "validateTitle": "Submit",
+      "validateText": "Once you've rated all the films, click \"Vote\" at the bottom of the page. The result will then be revealed to everyone."
+    }
+  },
+  "qr": {
+    "title": "Join the room",
+    "or": "or enter the code",
+    "copy": "Copy the code",
+    "copied": "✓ Copied!",
+    "close": "Close",
+    "copyError": "Unable to copy the code"
+  },
+  "snack": {
+    "joined": "{name} joined the room",
+    "left": "{name} left the room",
+    "exitConfirm": "Press again to exit"
+  },
+  "genres": {
+    "28": "Action",
+    "12": "Adventure",
+    "16": "Animation",
+    "35": "Comedy",
+    "80": "Crime",
+    "99": "Documentary",
+    "18": "Drama",
+    "10751": "Family",
+    "14": "Fantasy",
+    "36": "History",
+    "27": "Horror",
+    "10402": "Music",
+    "9648": "Mystery",
+    "10749": "Romance",
+    "878": "Science Fiction",
+    "53": "Thriller",
+    "10752": "War",
+    "37": "Western"
+  },
+  "common": {
+    "exit": "Exit",
+    "popularity": {
+      "all": "All",
+      "indie": "Hidden gems",
+      "arthouse": "Independent",
+      "mainstream": "Mainstream",
+      "popular": "Popular",
+      "blockbuster": "Blockbuster"
+    }
+  }
+}

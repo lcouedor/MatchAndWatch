@@ -3,13 +3,16 @@
 .stickyBar {
     position: sticky;
     top: 0;
-    z-index: 5;
+    z-index: 50;
     background: $backgroundColor;
     padding: 1vh 2vh;
     display: flex;
     align-items: center;
     gap: 12px;
     border-bottom: 1px solid rgba(197, 72, 232, 0.15);
+    /* Couvre le gap d'1px entre le headerMain et la barre */
+    margin-top: -1px;
+    padding-top: calc(1vh + 1px);
 }
 
 .headerProgress {

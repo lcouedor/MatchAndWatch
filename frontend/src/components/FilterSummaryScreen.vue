@@ -1,44 +1,44 @@
 <template>
     <div class="stepPage filterSummary">
-        <h2>Filtres appliqués</h2>
-        <p class="subtitle">Résultat du vote des préférences</p>
+        <h2>{{ $t('filterSummary.title') }}</h2>
+        <p class="subtitle">{{ $t('filterSummary.subtitle') }}</p>
 
         <div class="filterList" v-if="filters">
             <div class="filterItem">
-                <span class="filterKey">Note</span>
+                <span class="filterKey">{{ $t('createRoom.filterRating') }}</span>
                 <span class="filterVal">{{ filters.vote_average_min }} — {{ filters.vote_average_max }}</span>
             </div>
             <div class="filterItem">
-                <span class="filterKey">Année</span>
+                <span class="filterKey">{{ $t('filterSummary.filterYear') }}</span>
                 <span class="filterVal">{{ filters.release_year_min }} — {{ filters.release_year_max }}</span>
             </div>
             <div class="filterItem">
-                <span class="filterKey">Popularité</span>
+                <span class="filterKey">{{ $t('createRoom.filterPopularity') }}</span>
                 <span class="filterVal">{{ popularityLabel(filters.vote_count_min) }} — {{ popularityLabel(filters.vote_count_max ?? VOTE_COUNT_MAX) }}</span>
             </div>
             <div class="filterItem">
-                <span class="filterKey">Durée</span>
+                <span class="filterKey">{{ $t('createRoom.filterDuration') }}</span>
                 <span class="filterVal">{{ runtimeRangeLabel(filters.runtime_min, filters.runtime_max) }}</span>
             </div>
             <div class="filterItem filterItemGenres">
-                <span class="filterKey">Genres</span>
+                <span class="filterKey">{{ $t('createRoom.filterGenres') }}</span>
                 <div class="genreList">
                     <template v-if="filters.genres.length > 0">
                         <span v-for="id in filters.genres" :key="id" class="genreChip">
                             {{ genreName(id) }}
                         </span>
                     </template>
-                    <span v-else class="filterVal">Tous</span>
+                    <span v-else class="filterVal">{{ $t('filterSummary.filterGenresAll') }}</span>
                 </div>
             </div>
         </div>
 
         <div class="filmStatus">
             <template v-if="!filmsReady">
-                <Spinner>Sélection des films en cours…</Spinner>
+                <Spinner>{{ $t('filterSummary.filmLoading') }}</Spinner>
             </template>
             <button v-else class="normalButton startBtn" @click="emit('continue')">
-                Commencer
+                {{ $t('filterSummary.start') }}
             </button>
         </div>
     </div>
@@ -50,6 +50,7 @@ import { TMDB_GENRES } from 'shared-types/filters'
 import type { Room } from 'shared-types/room'
 import type { Filters } from 'shared-types/filters'
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{
     room: Room
@@ -60,12 +61,13 @@ const emit = defineEmits<{
     (e: 'continue'): void
 }>()
 
+const { t } = useI18n()
 const VOTE_COUNT_MAX = 50000
 
 const filters = computed<Filters | null>(() => props.room.filters ?? null)
 
 const genreName = (id: number): string =>
-    TMDB_GENRES.find(g => g.id === id)?.name ?? String(id)
+    t(`genres.${id}`) || (TMDB_GENRES.find(g => g.id === id)?.name ?? String(id))
 
 const formatRuntime = (v: number | null): string => {
     if (v === null || v === 0) return '∞'
@@ -81,12 +83,12 @@ const runtimeRangeLabel = (min: number | null, max: number | null): string => {
 
 const popularityLabel = (n: number): string => {
     if (n >= VOTE_COUNT_MAX) return '∞'
-    if (n >= 30000) return 'Blockbuster'
-    if (n >= 10000) return 'Populaire'
-    if (n >= 3000) return 'Grand public'
-    if (n >= 1000) return 'Indépendant'
-    if (n > 0) return 'Confidentiel'
-    return 'Tous'
+    if (n >= 30000) return t('common.popularity.blockbuster')
+    if (n >= 10000) return t('common.popularity.popular')
+    if (n >= 3000) return t('common.popularity.mainstream')
+    if (n >= 1000) return t('common.popularity.arthouse')
+    if (n > 0) return t('common.popularity.indie')
+    return t('common.popularity.all')
 }
 </script>
 

@@ -11,6 +11,7 @@ export interface Room {
   filter_mode: FilterMode
   filters: Filters | null
   step_timeout: number | null
+  language: string
   createdAt?: string
   updatedAt?: string
   watchers?: Watcher[]

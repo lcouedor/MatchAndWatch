@@ -7,11 +7,11 @@
             <StepProgress
                 :done="votesDone"
                 :total="room?.watchers?.length ?? 0"
-                label="ont voté"
+                :label="$t('results.voted')"
                 class="headerProgress"
             />
         </div>
-        <p class="waitingTitle">En attente des autres participants</p>
+        <p class="waitingTitle">{{ $t('results.waiting') }}</p>
         <div class="watchersList">
             <div v-for="watcher in watcherList" :key="watcher.id" class="watcherInWait">
                 {{ watcher.name }}
@@ -24,12 +24,19 @@
         <div v-if="winner" class="winnerSection">
             <div class="winnerBg" :style="`background-image: url(https://image.tmdb.org/t/p/w780/${winner.poster_path})`" />
             <div class="winnerContent">
-                <div class="winnerBadge">🏆 Film du soir</div>
+                <div class="winnerBadge">{{ $t('results.winnerBadge') }}</div>
                 <img class="winnerPoster" :src="`https://image.tmdb.org/t/p/w780/${winner.poster_path}`" :alt="winner.title" />
                 <h1 class="winnerTitle">{{ winner.title }}</h1>
                 <p class="winnerMeta">{{ getYear(winner.release_date) }} &nbsp;·&nbsp; {{ Math.round(winner.vote_average * 10) / 10 }}/10</p>
+                <a
+                    v-if="winner.imdb_id"
+                    :href="`https://www.imdb.com/title/${winner.imdb_id}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="imdbLink"
+                >IMDb</a>
                 <div class="winnerGenres">
-                    <span v-for="genre in winner.genres" :key="genre.id" class="genreChip">{{ genre.name }}</span>
+                    <span v-for="genre in winner.genres" :key="genre.id" class="genreChip">{{ $t(`genres.${genre.id}`) }}</span>
                 </div>
             </div>
         </div>
@@ -39,20 +46,27 @@
         </div>
 
         <div class="rankingSection" v-if="top5.length > 1">
-            <h2 class="rankingTitle">Classement</h2>
-            <div v-for="(item, index) in top5" :key="item.film.id" class="rankRow" :class="index === 0 ? 'rankFirst' : ''">
+            <h2 class="rankingTitle">{{ $t('results.ranking') }}</h2>
+            <div
+                v-for="(item, index) in top5"
+                :key="item.film.id"
+                class="rankRow"
+                :class="[index === 0 ? 'rankFirst' : '', item.film.overview ? 'rankClickable' : '']"
+                @click="item.film.overview && (synopsisFilm = item.film)"
+            >
                 <span class="rankNum">{{ index + 1 }}</span>
                 <img class="rankPoster" :src="`https://image.tmdb.org/t/p/w92/${item.film.poster_path}`" :alt="item.film.title" />
                 <span class="rankFilmTitle">{{ item.film.title }}</span>
+                <span v-if="item.film.overview" class="rankInfoHint">›</span>
             </div>
         </div>
 
         <div v-if="!winner" class="noWinner">
-            <p>Aucun film sélectionné</p>
+            <p>{{ $t('results.noWinner') }}</p>
         </div>
 
         <div class="rejectedSection" v-if="rejectedFilms.length > 0">
-            <h2 class="rankingTitle">Les oubliés</h2>
+            <h2 class="rankingTitle">{{ $t('results.rejected') }}</h2>
             <div class="rejectedCarousel">
                 <div v-for="film in rejectedFilms" :key="film.id" class="rejectedCard" @click="synopsisFilm = film">
                     <img
