@@ -21,6 +21,7 @@ export default class TMDBService {
     this.http = axios.create({
       baseURL: this.baseURL,
       params: { api_key: this.apiKey },
+      timeout: 10000,
     })
   }
 

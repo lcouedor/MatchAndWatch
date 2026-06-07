@@ -212,13 +212,25 @@ const getRoom = async (): Promise<Room> => {
     return roomData.data as Room;
 };
 
+const fetchFilmWithRetry = async (filmId: number, language: string, retries = 3): Promise<TMDBFilm | null> => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, { movieId: filmId, language });
+            if (response.data) return response.data;
+        } catch {
+            if (i < retries - 1) await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+        }
+    }
+    return null;
+};
+
 const getFilms = async (): Promise<TMDBFilm[]> => {
     if (!room.value?.bucket) return [];
     const language = room.value.language ?? 'fr-FR';
-    const films = await Promise.all(room.value.bucket.map(async (film) => {
-        const response: apiResponse<TMDBFilm> = await get<TMDBFilm>(`movie`, { movieId: film.film_id, language });
-        return response.data as TMDBFilm;
-    }));
+    const results = await Promise.all(
+        room.value.bucket.map(film => fetchFilmWithRetry(film.film_id, language))
+    );
+    const films = results.filter((f): f is TMDBFilm => f !== null);
     fullMoviesList.value = films;
     return films;
 };
