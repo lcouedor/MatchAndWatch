@@ -23,7 +23,10 @@ export default class Room extends BaseModel {
 
     @column({
       prepare: (value: Filters | null) => value ? JSON.stringify(value) : null,
-      consume: (value: string | null) => value ? JSON.parse(value) : null,
+      consume: (value: string | object | null) => {
+        if (!value) return null
+        return typeof value === 'string' ? JSON.parse(value) : value
+      },
     })
     public filters: Filters | null;
 

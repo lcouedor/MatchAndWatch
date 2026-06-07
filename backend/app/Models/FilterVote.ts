@@ -16,7 +16,7 @@ export default class FilterVote extends BaseModel {
 
   @column({
     prepare: (value: Filters) => JSON.stringify(value),
-    consume: (value: string) => JSON.parse(value),
+    consume: (value: string | object) => typeof value === 'string' ? JSON.parse(value) : value,
   })
   public filters: Filters
 
