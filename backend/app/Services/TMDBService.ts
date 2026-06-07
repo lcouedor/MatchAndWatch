@@ -116,7 +116,7 @@ export default class TMDBService {
       const response = await this.http.get<TMDBDiscoverResponse>('/discover/movie', {
         params: { ...discoverParams, page: pagePool[i] },
       })
-      for (const film of this.shuffle(response.data.results)) {
+      for (const film of this.shuffle(response.data.results as TMDBFilm[])) {
         if (!seenIds.has(film.id) && selectedFilms.length < numFilms) {
           seenIds.add(film.id)
           selectedFilms.push(film)
