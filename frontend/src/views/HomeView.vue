@@ -38,7 +38,9 @@ import ModaleJoinRoom from '@/modales/ModaleJoinRoom.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLocale, type SupportedLocale } from '@/i18n'
-import { version as appVersion } from '../../package.json'
+import pkg from '../../package.json'
+
+const appVersion = pkg.version
 
 const { locale } = useI18n()
 

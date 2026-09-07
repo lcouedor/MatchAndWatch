@@ -28,24 +28,20 @@
         </div>
 
         <div class="containerFilms">
-            <!-- Carte suivante, légèrement en retrait -->
-            <div v-if="nextFilm" class="backCard" ref="backCardEl">
-                <img :src="`https://image.tmdb.org/t/p/w780/${nextFilm.poster_path}`" />
-            </div>
-
-            <!-- Carte courante, interactive -->
-            <div v-if="currentFilm" class="swipeCard" ref="card"
-                @touchstart="onDragStart" @touchend="onDragEnd">
-                <img :src="`https://image.tmdb.org/t/p/w780/${currentFilm.poster_path}`" />
-                <div id="leftZone" ref="actualLeft">
-                    <div class="background"></div>
-                    <span>{{ $t('swipe.noWatch') }}</span>
+            <Transition :css="false" @enter="onEnter" @leave="onLeave">
+                <div v-if="currentFilm" :key="currentFilm.id" class="swipeCard" ref="card"
+                    @touchstart="onDragStart" @touchend="onDragEnd">
+                    <img :src="`https://image.tmdb.org/t/p/w780/${currentFilm.poster_path}`" />
+                    <div id="leftZone" ref="actualLeft">
+                        <div class="background"></div>
+                        <span>{{ $t('swipe.noWatch') }}</span>
+                    </div>
+                    <div id="rightZone" ref="actualRight">
+                        <div class="background"></div>
+                        <span>{{ $t('swipe.watch') }}</span>
+                    </div>
                 </div>
-                <div id="rightZone" ref="actualRight">
-                    <div class="background"></div>
-                    <span>{{ $t('swipe.watch') }}</span>
-                </div>
-            </div>
+            </Transition>
         </div>
 
         <div class="overviewZone" v-if="currentFilm">
@@ -55,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import StepProgress from "@/components/StepProgress.vue";
 import { Room } from 'shared-types/room';
 import { TMDBFilm } from 'shared-types/tmdb';
@@ -65,9 +61,9 @@ const displayFilms = ref<TMDBFilm[]>([]);
 const currentFilm = ref<TMDBFilm | null>(null);
 const initialX = ref(0);
 const card = ref<HTMLElement | null>(null);
-const backCardEl = ref<HTMLElement | null>(null);
 const actualLeft = ref<HTMLElement | null>(null);
 const actualRight = ref<HTMLElement | null>(null);
+let pendingDirection: 'left' | 'right' = 'left';
 
 const props = defineProps<{
     room: Room | null,
@@ -87,8 +83,6 @@ watch(currentFilm, (film) => {
 });
 
 const emitDone = () => emit('validStep1', [...seenFilmIds]);
-
-const nextFilm = computed(() => displayFilms.value[displayFilms.value.length - 1] ?? null)
 
 const swipesDone = computed(() =>
     props.room?.watchers?.filter(w => w.step >= 1).length ?? 0
@@ -141,64 +135,55 @@ watch([() => props.ready, () => props.movies], ([newReady, newMovies]) => {
     }
 }, { immediate: true });
 
-// ─── Back card helpers ──────────────────────────────────────
-const BACK_SCALE = 0.94
-const BACK_TY = 10 // px
-
-const setBackProgress = (p: number) => {
-    if (!backCardEl.value) return
-    const scale = BACK_SCALE + (1 - BACK_SCALE) * p
-    const ty = BACK_TY * (1 - p)
-    backCardEl.value.style.transform = `translateX(-50%) translateY(${ty}px) scale(${scale})`
-}
-
 // ─── Card animation ─────────────────────────────────────────
 const getCardCenter = () => {
     const rect = card.value!.getBoundingClientRect()
     return rect.left + rect.width / 2
 }
 
-const resetCard = () => {
-    if (!card.value) return
-    card.value.style.transform = 'translateX(-50%)'
-    card.value.style.transition = 'none'
-    if (actualLeft.value) actualLeft.value.style.opacity = '0'
-    if (actualRight.value) actualRight.value.style.opacity = '0'
-}
-
-const animateCard = (dir: 'left' | 'right', callback: () => void) => {
+// Carte qui sort : elle continue sa trajectoire depuis sa position de lâcher
+// au lieu d'être téléportée, jusqu'à sortir complètement de l'écran.
+const onLeave = (el: Element, done: () => void) => {
+    const htmlEl = el as HTMLElement
     const duration = 280
-    const tx = dir === 'left'
+    const tx = pendingDirection === 'left'
         ? 'translateX(calc(-50% - 110vw))'
         : 'translateX(calc(-50% + 110vw))'
-    const rot = dir === 'left' ? 'rotate(-22deg)' : 'rotate(22deg)'
+    const rot = pendingDirection === 'left' ? 'rotate(-22deg)' : 'rotate(22deg)'
 
-    // Promote back card in sync with exit
-    if (backCardEl.value) {
-        backCardEl.value.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
-        setBackProgress(1)
-    }
+    htmlEl.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+    void htmlEl.offsetWidth // force reflow pour que la transition prenne effet
+    htmlEl.style.transform = `${tx} ${rot}`
 
-    card.value!.style.transform = `${tx} ${rot}`
-    card.value!.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94)`
+    setTimeout(done, duration)
+}
 
-    setTimeout(() => {
-        callback()
-        resetCard()
-        // Reset back card position while it's hidden under the new front card
-        nextTick(() => {
-            if (backCardEl.value) {
-                backCardEl.value.style.transition = 'none'
-                setBackProgress(0)
-            }
-        })
-    }, duration)
+// Carte suivante : elle apparaît en fondu avec un léger scale, jamais visible en avance.
+const onEnter = (el: Element, done: () => void) => {
+    const htmlEl = el as HTMLElement
+    const duration = 260
+
+    htmlEl.style.transition = 'none'
+    htmlEl.style.opacity = '0'
+    htmlEl.style.transform = 'translateX(-50%) translateY(10px) scale(0.94)'
+    void htmlEl.offsetWidth // force reflow
+
+    htmlEl.style.transition = `transform ${duration}ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity ${duration - 60}ms ease`
+    htmlEl.style.opacity = '1'
+    htmlEl.style.transform = 'translateX(-50%) translateY(0) scale(1)'
+
+    setTimeout(done, duration)
 }
 
 // ─── Touch handlers ─────────────────────────────────────────
 const onDragStart = (e: TouchEvent) => {
     initialX.value = e.touches[0].clientX
-    resetCard()
+    if (card.value) {
+        card.value.style.transition = 'none'
+        card.value.style.transform = 'translateX(-50%)'
+    }
+    if (actualLeft.value) actualLeft.value.style.opacity = '0'
+    if (actualRight.value) actualRight.value.style.opacity = '0'
 }
 
 const onDragMove = (e: TouchEvent) => {
@@ -230,13 +215,6 @@ const onDragMove = (e: TouchEvent) => {
         actualLeft.value!.style.opacity = '0'
         actualRight.value!.style.opacity = '0'
     }
-
-    // Scale up back card progressively
-    const progress = Math.min(Math.abs(diff) / (window.innerWidth / 2), 1)
-    if (backCardEl.value) {
-        backCardEl.value.style.transition = 'none'
-        setBackProgress(progress)
-    }
 }
 
 const onDragEnd = () => {
@@ -247,27 +225,21 @@ const onDragEnd = () => {
     const bucketSize = props.room?.bucket_size ?? Infinity
 
     if (center < quarter) {
-        animateCard('left', () => {
-            currentFilm.value = displayFilms.value.pop() || null
-            if (!currentFilm.value) emitDone()
-        })
+        pendingDirection = 'left'
+        currentFilm.value = displayFilms.value.pop() || null
+        if (!currentFilm.value) emitDone()
     } else if (center > 3 * quarter) {
-        animateCard('right', () => {
-            if (currentFilm.value) props.userBucket.push(currentFilm.value)
-            currentFilm.value = displayFilms.value.pop() || null
-            if (props.userBucket.length >= bucketSize || !currentFilm.value) emitDone()
-        })
+        pendingDirection = 'right'
+        props.userBucket.push(currentFilm.value!)
+        currentFilm.value = displayFilms.value.pop() || null
+        if (props.userBucket.length >= bucketSize || !currentFilm.value) emitDone()
     } else {
-        // Snap back
+        // Snap back au centre, le film reste le même
         card.value.style.transform = 'translateX(-50%)'
         card.value.style.transition = 'transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
         setTimeout(() => { if (card.value) card.value.style.transition = 'none' }, 400)
         actualLeft.value!.style.opacity = '0'
         actualRight.value!.style.opacity = '0'
-        if (backCardEl.value) {
-            backCardEl.value.style.transition = 'transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-            setBackProgress(0)
-        }
     }
 }
 </script>

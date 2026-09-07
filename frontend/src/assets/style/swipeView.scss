@@ -49,22 +49,6 @@
     height: 44dvh; //La hauteur de la carte + 2vh de marge en haut et en bas
 }
 
-.backCard {
-    height: 40dvh;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%) translateY(10px) scale(0.94);
-    border-radius: 15px;
-    overflow: hidden;
-    z-index: 2;
-    filter: blur(6px);
-
-    img {
-        height: 40dvh;
-        display: block;
-    }
-}
-
 .swipeCard {
     height: 40dvh;
     position: absolute;
