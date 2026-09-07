@@ -21,6 +21,7 @@
 	</div>
 
 	<div class="info" @click="showModal('modaleInfo')">i</div>
+	<div class="appVersion">v{{ appVersion }}</div>
 
 	<ModaleInfo ref="modaleInfo" :page="-1" />
 	<ModaleCreateRoom ref="modaleCreateRoom" />
@@ -37,6 +38,7 @@ import ModaleJoinRoom from '@/modales/ModaleJoinRoom.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { setLocale, type SupportedLocale } from '@/i18n'
+import { version as appVersion } from '../../package.json'
 
 const { locale } = useI18n()
 
@@ -88,5 +90,14 @@ const showModal = (modaleId: string) => {
 		border-color: rgba(118, 86, 245, 0.7);
 		transform: scale(1.1);
 	}
+}
+
+.appVersion {
+	width: 100vw;
+	margin-top: 1vh;
+	text-align: center;
+	font-size: 0.7rem;
+	letter-spacing: 0.05em;
+	color: rgba(224, 224, 224, 0.35);
 }
 </style>
