@@ -22,7 +22,10 @@ html, body{
     width: 100vw;
     overflow: hidden;
 
-    background: $backgroundColor;
+    background:
+        radial-gradient(ellipse 70% 50% at 30% 35%, rgba(118, 86, 245, 0.07) 0%, transparent 100%),
+        radial-gradient(ellipse 50% 70% at 72% 65%, rgba(197, 72, 232, 0.05) 0%, transparent 100%),
+        $backgroundColor;
 }
 
 .info{
