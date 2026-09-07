@@ -12,7 +12,7 @@ Application mobile-first permettant à un groupe de choisir collectivement un fi
 |---------|-----|
 | **Frontend (prod)** | https://match-and-watch.vercel.app |
 | **Backend (prod)** | https://matchandwatch-backend.onrender.com |
-| **Base de données** | Supabase — projet `Match&Watch` (région `eu-west-1`) |
+| **Base de données** | Neon — projet `neondb` (région `eu-west-2`) |
 
 > Le backend tourne sur Render free tier : il se met en veille après 15 minutes d'inactivité. La première requête après une période d'inactivité peut prendre 30 à 60 secondes le temps du cold start.
 
@@ -77,7 +77,7 @@ Le créateur peut définir un temps limite par étape. À expiration, la contrib
 | AdonisJS 5 | Framework Node.js (routing, ORM, validation) |
 | Lucid ORM | Accès base de données avec migrations |
 | Socket.IO | Synchronisation temps réel entre participants |
-| PostgreSQL | Base de données production (Supabase) |
+| PostgreSQL | Base de données production (Neon) |
 | SQLite | Base de données développement local |
 | TMDB API | Sélection aléatoire de films + métadonnées en français |
 | TypeScript | Typage complet |
@@ -250,7 +250,7 @@ L'application est déployée sur trois services :
 |-----------|---------|-------------|
 | Backend | [Render](https://render.com) (Web Service) | Push sur `main` |
 | Frontend | [Vercel](https://vercel.com) (Static) | Push sur `main` |
-| Base de données | [Supabase](https://supabase.com) (PostgreSQL) | Manuel (migrations) |
+| Base de données | [Neon](https://neon.tech) (PostgreSQL) | Manuel (migrations) |
 
 ### Backend sur Render
 
@@ -274,16 +274,16 @@ L'application est déployée sur trois services :
 | `APP_NAME` | `Match&Watch` |
 | `DRIVE_DISK` | `local` |
 | `DB_CONNECTION` | `pg` |
-| `PG_HOST` | `aws-0-eu-west-1.pooler.supabase.com` |
+| `PG_HOST` | `ep-lingering-breeze-zasjw2o7-pooler.c-2.eu-west-2.aws.neon.tech` |
 | `PG_PORT` | `5432` |
-| `PG_USER` | `postgres.gfvatelivexmwfikhoqe` |
-| `PG_PASSWORD` | *(mot de passe Supabase)* |
-| `PG_DB_NAME` | `postgres` |
+| `PG_USER` | `neondb_owner` |
+| `PG_PASSWORD` | *(mot de passe Neon)* |
+| `PG_DB_NAME` | `neondb` |
 | `TMDB_API_KEY` | *(clé TMDB)* |
 | `TMDB_READ_ACCESS_TOKEN` | *(token TMDB)* |
 | `TMDB_BASE_URL` | `https://api.themoviedb.org/3` |
 
-> **Note Supabase** : on utilise le **connection pooler** Supabase (hostname `aws-0-eu-west-1.pooler.supabase.com`) plutôt que la connexion directe, car Render free tier ne supporte pas IPv6 et le hostname direct de Supabase résout en IPv6. Le format du `PG_USER` avec le pooler est `postgres.{project_ref}`.
+> **Note Neon** : on utilise le **connection pooler** Neon (hostname avec le suffixe `-pooler`), recommandé pour les connexions depuis un serveur applicatif classique. Contrairement à Supabase, la base se met en veille après inactivité mais **se réveille automatiquement** à la requête suivante — pas de restauration manuelle depuis un dashboard.
 
 ### Frontend sur Vercel
 
@@ -299,11 +299,11 @@ L'application est déployée sur trois services :
 |----------|--------|
 | `VUE_APP_API_URL` | `https://matchandwatch-backend.onrender.com` |
 
-### Base de données Supabase
+### Base de données Neon
 
-Les migrations sont appliquées automatiquement au démarrage du backend (`node ace migration:run --force` dans le Start Command). Pour appliquer une migration manuellement, utiliser le dashboard Supabase → SQL Editor, ou via le MCP Supabase.
+Les migrations sont appliquées automatiquement au démarrage du backend (`node ace migration:run --force` dans le Start Command). Pour appliquer une migration manuellement, utiliser la console Neon → SQL Editor.
 
-**Projet Supabase :** `gfvatelivexmwfikhoqe` — région `eu-west-1`
+**Projet Neon :** `neondb` — région `eu-west-2`
 
 ---
 
