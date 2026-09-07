@@ -10,8 +10,11 @@
     font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-body{
+html, body{
+    height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
+    background: $backgroundColor;
 }
 
 #mainApp{
